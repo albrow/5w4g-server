@@ -37,3 +37,23 @@ To run the server with fresh, just use:
 ```bash
 fresh
 ```
+
+Runtime Environments
+--------------------
+
+The 5w4g server has 3 different runtime environments, each of which uses a different database and runs on a different port.
+The environments are configured in config/config.go. You can change the runtime environment with the `GO_ENV` variable. So, for
+example to run in the test environment, run `GO_ENV=test go run server.go` or `GO_ENV=test fresh`
+
+#### Development
+The default environment if none is specified. Used for development on a local machine. Not for use on a
+remote server. Prints out full messages and a line number if there is an internal server error.
+
+#### Production
+For use on a remote server. Does not print out full error messages or a line number when there is an internal
+server error and instead prints out a generic message. This is for security reasons.
+
+#### Test
+Used for running tests, i.e. all the code in the tests folder will attempt to connect to a server
+running in the test environment. When running in the test environment, the database is erased everytime
+you restart the server.

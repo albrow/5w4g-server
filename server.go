@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/albrow/5w4g/config"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func main() {
+	config.Init()
 
 	n := negroni.New(negroni.NewLogger())
 	router := mux.NewRouter()
@@ -16,5 +18,5 @@ func main() {
 	})
 	n.UseHandler(router)
 
-	n.Run(":3000")
+	n.Run(":" + config.Port)
 }
