@@ -5,6 +5,7 @@ import (
 	"github.com/albrow/5w4g-server/controllers"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/codegangsta/negroni"
+	"github.com/goincremental/negroni-sessions"
 	"github.com/gorilla/mux"
 	"github.com/martini-contrib/cors"
 )
@@ -23,6 +24,8 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))
+	store := sessions.NewCookieStore(config.Secret)
+	n.Use(sessions.Sessions("5w4g_session", store))
 
 	// Define routes
 	router := mux.NewRouter()

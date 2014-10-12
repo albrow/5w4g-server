@@ -1,7 +1,7 @@
 package models
 
 type AdminUser struct {
-	Email          string `json:"email"`
+	Email          string `json:"email" zoom:"index"`
 	HashedPassword string `json:"-"`
 	Identifier
 }
