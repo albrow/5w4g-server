@@ -40,8 +40,7 @@ func (c *AdminUserController) SignIn(res http.ResponseWriter, req *http.Request)
 	if err := zoom.NewQuery("AdminUser").Filter("Email =", adminData.Get("email")).ScanOne(admin); err != nil {
 		if _, ok := err.(*zoom.ModelNotFoundError); ok {
 			// This means a model with that email address was not found
-			val.AddError("email", "Email or password was incorrect.")
-			val.AddError("password", "Email or password was incorrect.")
+			val.AddError("email", "email or password was incorrect.")
 			errors := map[string]interface{}{
 				"errors": val.ErrorMap(),
 			}
@@ -55,8 +54,7 @@ func (c *AdminUserController) SignIn(res http.ResponseWriter, req *http.Request)
 
 	// Check if the found admin's password matches the submitted password
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.HashedPassword), adminData.GetBytes("password")); err != nil {
-		val.AddError("email", "Email or password was incorrect.")
-		val.AddError("password", "Email or password was incorrect.")
+		val.AddError("email", "email or password was incorrect.")
 		errors := map[string]interface{}{
 			"errors": val.ErrorMap(),
 		}
