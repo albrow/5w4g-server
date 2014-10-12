@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/albrow/5w4g/config"
+	"github.com/albrow/5w4g/models"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 
 func main() {
 	config.Init()
+	models.Init()
 
 	n := negroni.New(negroni.NewLogger())
 	router := mux.NewRouter()
