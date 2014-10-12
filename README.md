@@ -12,6 +12,11 @@ Prerequisites
 - Redis version >= 2.8.9
 	- [Installation instructions](http://redis.io/download)
 	- [Post-install instructions](http://redis.io/topics/quickstart)
+- [Git](http://git-scm.com/downloads)
+- [Bazaar](http://bazaar.canonical.com/en/)
+	- If you're on Mac OS and you have homebrew, just run `brew install bazaar`
+- [Mercurial](http://mercurial.selenic.com/)
+	- If you're on Mac OS and you have homebrew, just run `brew install mercurial`
 
 Getting Up and Running
 ----------------------
@@ -21,6 +26,8 @@ Install dependencies:
 ```bash
 go get ./...
 ```
+
+Start redis. Depending on your setup, you may be able to just run `redis-server`
 
 Run the server:
 
