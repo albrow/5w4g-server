@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/albrow/5w4g/config"
-	"github.com/albrow/5w4g/controllers"
-	"github.com/albrow/5w4g/models"
+	"github.com/albrow/5w4g-server/config"
+	"github.com/albrow/5w4g-server/controllers"
+	"github.com/albrow/5w4g-server/models"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/martini-contrib/cors"

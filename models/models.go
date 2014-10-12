@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/albrow/5w4g/config"
+	"github.com/albrow/5w4g-server/config"
 	"github.com/albrow/zoom"
 )
 
