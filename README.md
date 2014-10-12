@@ -12,3 +12,28 @@ Prerequisites
 - Redis version >= 2.8.9
 	- [Installation instructions](http://redis.io/download)
 	- [Post-install instructions](http://redis.io/topics/quickstart)
+
+Getting Up and Running
+----------------------
+
+Install dependencies:
+
+```bash
+go get ./...
+```
+
+Run the server:
+
+```bash
+go run server.go
+```
+
+If you want, you can install a tool called [fresh](https://github.com/pilu/fresh),
+which will automatically restart the application when you make changes to the source
+code.
+
+To run the server with fresh, just use:
+
+```bash
+fresh
+```
