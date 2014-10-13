@@ -224,6 +224,55 @@ Example Responses:
 }
 ```
 
+#### POST /admin/users
+**Requires Admin Authentication**
+
+Purpose: Create a new admin user
+
+URL Parameters: none
+
+Body Parameters:
+(fields with an asterisk are required)
+
+| Field            | Description     |
+| ---------------- | --------------- |
+| email\*          | The admin user's email address. Must be properly formatted. |
+| password\*       | The admin user's password. Must be at least 8 characters long. |
+
+Response:
+
+| Field            | Type      | Description     |
+| ---------------- | --------- | --------------- |
+| admin            | object    | The admin user. Contains fields such as email and id. |
+| errors           | object    | The errors that occured (if any). |
+| message          | string    | A message from the server (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "admin": {
+        "email": "new@example.com",
+        "id": "DnlK3zdiqsv6Hwzdnddajl"
+    },
+    "message": "New admin user created!"
+}
+```
+
+```json
+{
+    "errors": {
+        "email": [
+            "that email address is already taken."
+        ],
+        "password": [
+            "password must be at least 8 characters long."
+        ]
+    }
+}
+```
+
 Error Codes
 -----------
 

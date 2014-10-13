@@ -138,7 +138,6 @@ func CurrentAdminUser(req *http.Request) *models.AdminUser {
 	}
 	split := strings.SplitN(tokenString, ":", 2)
 	email, hashedPassword := split[0], split[1]
-	fmt.Println(email, hashedPassword)
 
 	// Find the admin user with the provided email and password
 	admin := &models.AdminUser{}
