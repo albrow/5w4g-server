@@ -104,6 +104,27 @@ func (c *AdminSessionsController) Delete(res http.ResponseWriter, req *http.Requ
 	})
 }
 
+func (c *AdminSessionsController) Show(res http.ResponseWriter, req *http.Request) {
+	r := render.New(render.Options{})
+
+	// Check if admin is signed in
+	admin := CurrentAdminUser(req)
+	if admin != nil {
+		r.JSON(res, 200, map[string]interface{}{
+			"admin":    admin,
+			"message":  "You are signed in.",
+			"signedIn": true,
+		})
+		return
+	} else {
+		r.JSON(res, 200, map[string]interface{}{
+			"message":  "You are not signed in.",
+			"signedIn": false,
+		})
+		return
+	}
+}
+
 func CurrentAdminUser(req *http.Request) *models.AdminUser {
 	// Get and parse the auth_token from the session data
 	session := sessions.GetSession(req)
