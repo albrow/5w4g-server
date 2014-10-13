@@ -27,15 +27,10 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Parse data from request
-	allData, err := data.Parse(req)
+	adminData, err := data.Parse(req)
 	if err != nil {
 		panic(err)
 	}
-	adminMap := map[string]string{}
-	if err := allData.GetAndUnmarshalJSON("admin", &adminMap); err != nil {
-		panic(err)
-	}
-	adminData := data.CreateFromMap(adminMap)
 
 	// Validations
 	val := adminData.Validator()

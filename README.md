@@ -256,8 +256,7 @@ Example Responses:
     "admin": {
         "email": "new@example.com",
         "id": "DnlK3zdiqsv6Hwzdnddajl"
-    },
-    "message": "New admin user created!"
+    }
 }
 ```
 
@@ -361,6 +360,103 @@ Example Responses:
             "You can't delete yourself, bro!"
         ]
     }
+}
+```
+
+#### POST /admin/items
+**Requires Admin Authentication**
+
+Purpose: Create a new item
+
+URL Parameters: none
+
+Body Parameters:
+(fields with an asterisk are required)
+
+| Field            | Description     |
+| ---------------- | --------------- |
+| name\*           | The name of the item. Must be unique. |
+| description\*    | The description for the item. Should be a sentence or two. |
+| price\*          | The price of the item in dollars (decimal points allowed). |
+| imageUrl\*       | The url of the image for the item (e.g. hosted on dropbox or s3/cloudfront). |
+
+Response:
+
+| Field            | Type      | Description     |
+| ---------------- | --------- | --------------- |
+| item             | object    | The item object. |
+| errors           | object    | The errors that occured (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "items": [
+        {
+            "name": "Ice Cube Sticker",
+            "imageUrl": "http://placehold.it/350x350",
+            "price": 3,
+            "description": "This sticker is really cool. Ice cold, actually.",
+            "id": "k4FbclRdLYXVfELnndelad"
+        }
+    ]
+}
+```
+
+```json
+{
+    "errors": {
+        "imageUrl": [
+            "imageUrl is required."
+        ],
+        "name": [
+            "that item name is already taken."
+        ],
+        "price": [
+            "price must be greater than 0.000000."
+        ]
+    }
+}
+```
+
+#### GET /admin/users
+**Requires Admin Authentication**
+
+Purpose: List all existing items
+
+URL Parameters: none
+
+Body Parameters: none
+
+Response:
+
+| Field      | Type      | Description     |
+| ---------- | --------- | --------------- |
+| items      | object    | A javascript array of items. |
+| errors     | object    | The errors that occured (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "items": [
+        {
+            "name": "Sticker Sticker",
+            "imageUrl": "http://placehold.it/350x350",
+            "price": 42,
+            "description": "Yo dawg, I herd you like stickers, so I put a sticker on your sticker so you can stick a sticker sticker to your stickers. ",
+            "id": "2MxIL1sHBvXZKUMDndelnw"
+        },
+        {
+            "name": "Ice Cube Sticker",
+            "imageUrl": "http://placehold.it/350x350",
+            "price": 3,
+            "description": "This sticker is really cool. Ice cold, actually.",
+            "id": "k4FbclRdLYXVfELnndelad"
+        }
+    ]
 }
 ```
 

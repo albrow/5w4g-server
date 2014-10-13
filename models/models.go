@@ -7,7 +7,6 @@ import (
 )
 
 func Init() {
-
 	// Initialize zoom
 	zoom.Init(&zoom.Configuration{
 		Network:  config.Db.Network,
@@ -16,8 +15,11 @@ func Init() {
 	})
 
 	// Register all models
-	if err := zoom.Register(&AdminUser{}); err != nil {
-		panic(err)
+	models := []zoom.Model{&AdminUser{}, &Item{}}
+	for _, m := range models {
+		if err := zoom.Register(m); err != nil {
+			panic(err)
+		}
 	}
 
 	// Create a default admin user if needed
