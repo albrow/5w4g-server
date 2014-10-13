@@ -328,29 +328,14 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| admins            | object    | A javascript array of admin users. Each contains fields such as email and id. |
 | errors            | object    | The errors that occured (if any). |
 
+Note: if the request was successful, the response will simply be an empty JSON object.
 
 Example Responses:
 
 ```json
-{
-    "admins": [
-        {
-            "email": "admin@5w4g.com",
-            "id": "2AmRlXcIDvmc8tXVndd09p"
-        },
-        {
-            "email": "a@b.c",
-            "id": "DnlK3zdiqsv6Hwzdnddajl"
-        },
-        {
-            "email": "new@example.com",
-            "id": "OQyxUYZU2Cd2pgRFnddabo"
-        }
-    ]
-}
+{}
 ```
 
 ```json
@@ -392,7 +377,7 @@ Example Responses:
 
 ```json
 {
-    "items": [
+    "item": [
         {
             "name": "Ice Cube Sticker",
             "imageUrl": "http://placehold.it/350x350",
@@ -420,7 +405,7 @@ Example Responses:
 }
 ```
 
-#### GET /admin/users
+#### GET /admin/items
 **Requires Admin Authentication**
 
 Purpose: List all existing items
@@ -457,6 +442,103 @@ Example Responses:
             "id": "k4FbclRdLYXVfELnndelad"
         }
     ]
+}
+```
+
+
+#### DELETE /admin/items/:id
+**Requires Admin Authentication**
+
+Purpose: Delete an existing item
+
+URL Parameters:
+
+| Field         | Description     |
+| ------------- | --------------- |
+| id\*          | The id of the item you want to delete |
+
+Body Parameters: none
+
+Response:
+
+| Field             | Type      | Description     |
+| ----------------- | --------- | --------------- |
+| errors            | object    | The errors that occured (if any). |
+
+Note: if the request was successful, the response will simply be an empty JSON object.
+
+Example Responses:
+
+```json
+{}
+```
+
+```json
+{
+    "errors": {
+        "error": [
+           "dial tcp 127.0.0.1:6379: connection refused"
+        ]
+    }
+}
+```
+
+#### PUT /admin/items/:id
+**Requires Admin Authentication**
+
+Purpose: Update an existing item
+
+URL Parameters:
+
+| Field         | Description     |
+| ------------- | --------------- |
+| id\*          | The id of the item you want to update |
+
+Body Parameters:
+(fields with an asterisk are required)
+
+| Field         | Description     |
+| ------------- | --------------- |
+| name          | The name of the item. Must be unique. |
+| description   | The description for the item. Should be a sentence or two. |
+| price         | The price of the item in dollars (decimal points allowed). |
+| imageUrl      | The url of the image for the item (e.g. hosted on dropbox or s3/cloudfront). |
+
+Response:
+
+| Field            | Type      | Description     |
+| ---------------- | --------- | --------------- |
+| item             | object    | The item object. |
+| errors           | object    | The errors that occured (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "item": {
+        "name": "This name was updated",
+        "imageUrl": "http://placehold.it/350x350",
+        "price": 9000,
+        "description": "This description was also just updated",
+        "id": "k4FbclRdLYXVfELnndelad"
+    }
+}
+```
+
+```json
+{
+    "errors": {
+        "imageUrl": [
+            "imageUrl is required."
+        ],
+        "name": [
+            "that item name is already taken."
+        ],
+        "price": [
+            "price must be greater than 0.000000."
+        ]
+    }
 }
 ```
 
