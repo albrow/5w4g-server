@@ -74,6 +74,44 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 	r.JSON(res, 200, jsonData)
 }
 
+func (c AdminItemsController) Show(res http.ResponseWriter, req *http.Request) {
+	r := render.New(render.Options{})
+
+	// Make sure we're signed in
+	if currentUser := CurrentAdminUser(req); currentUser == nil {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"You need to be signed in to do that!"},
+			},
+		}
+		r.JSON(res, 401, jsonData)
+		return
+	}
+
+	// Get the id from the url
+	vars := mux.Vars(req)
+	id, found := vars["id"]
+	if !found {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"Missing required url parameter: id"},
+			},
+		}
+		r.JSON(res, 422, jsonData)
+		return
+	}
+
+	// Find item in the database
+	item := &models.Item{}
+	if err := zoom.ScanById(id, item); err != nil {
+		panic(err)
+	}
+
+	// render response
+	jsonData := map[string]interface{}{"item": item}
+	r.JSON(res, 200, jsonData)
+}
+
 func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 

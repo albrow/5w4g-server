@@ -404,6 +404,52 @@ Example Responses:
 }
 ```
 
+#### GET /admin/items/:id
+**Requires Admin Authentication**
+
+Purpose: Get a single existing items
+
+URL Parameters:
+
+| Field         | Description     |
+| ------------- | --------------- |
+| id\*          | The id of the item you want to get |
+
+Body Parameters: none
+
+Response:
+
+| Field             | Type      | Description      |
+| ----------------- | --------- | ---------------- |
+| item              | object    | The item object. |
+| errors            | array     | The errors that occured (if any). |
+
+Note: if the request was successful, the response will simply be an empty JSON object.
+
+Example Responses:
+
+```json
+{
+    "item": {
+        "name": "Nothing",
+        "imageUrl": "http://placehold.it/350x350",
+        "price": 10000000000000000,
+        "description": "Pay us money for nothing. There is no sticker and no item of any kind.",
+        "id": "9RlIVFnDQ5IHCwUpndemxm"
+    }
+}
+```
+
+```json
+{
+    "errors": {
+        "error": [
+           "dial tcp 127.0.0.1:6379: connection refused"
+        ]
+    }
+}
+```
+
 #### GET /admin/items
 **Requires Admin Authentication**
 

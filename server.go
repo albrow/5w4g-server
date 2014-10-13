@@ -55,6 +55,7 @@ func main() {
 	adminItems := controllers.AdminItemsController{}
 	adminRouter.HandleFunc("/items", adminItems.Create).Methods("POST")
 	adminRouter.HandleFunc("/items", adminItems.Index).Methods("GET")
+	adminRouter.HandleFunc("/items/{id}", adminItems.Show).Methods("GET")
 	adminRouter.HandleFunc("/items/{id}", adminItems.Update).Methods("PUT")
 	adminRouter.HandleFunc("/items/{id}", adminItems.Delete).Methods("DELETE")
 	n.UseHandler(router)
