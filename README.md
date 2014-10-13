@@ -123,17 +123,17 @@ URL Parameters: none
 Body Parameters:
 (fields with an asterisk are required)
 
-| Field    			 | Description     |
+| Field            | Description     |
 | ---------------- | --------------- |
 | email\*          | The admin user's email address. Must be properly formatted. |
 | password\*       | The admin user's password. |
 
 Response:
 
-| Field    		   | Type      | Description     |
+| Field           | Type      | Description     |
 | --------------- | --------- | --------------- |
 | admin           | object    | The admin user. Contains fields such as email and id. |
-| errors          | object    | The errors that occured (if any). |
+| errors          | array     | The errors that occured (if any). |
 | message         | string    | A message from the server (if any). |
 | alreadySignedIn | boolean   | Whether or not the user was already signed in when the request was sent. | 
 
@@ -173,9 +173,9 @@ Body Parameters: none
 
 Response:
 
-| Field    		    | Type      | Description     |
+| Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
-| errors           | object    | The errors that occured (if any). |
+| errors           | array     | The errors that occured (if any). |
 | message          | string    | A message from the server (if any). |
 | alreadySignedOut | boolean   | Whether or not the user was already signed out when the request was sent. | 
 
@@ -200,7 +200,7 @@ Response:
 | Field    		    | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | admin            | object    | The admin user. Returned iff signedIn is true. Contains fields such as email and id. |
-| errors           | object    | The errors that occured (if any). |
+| errors           | array     | The errors that occured (if any). |
 | message          | string    | A message from the server (if any). |
 | signedIn         | boolean   | Whether or not the user was signed in. | 
 
@@ -245,8 +245,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | admin            | object    | The admin user. Contains fields such as email and id. |
-| errors           | object    | The errors that occured (if any). |
-| message          | string    | A message from the server (if any). |
+| errors           | array     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -286,8 +285,8 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| admins            | object    | A javascript array of admin users. Each contains fields such as email and id. |
-| errors            | object    | The errors that occured (if any). |
+| admins            | array     | A javascript array of admin users. Each contains fields such as email and id. |
+| errors            | array     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -328,7 +327,7 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| errors            | object    | The errors that occured (if any). |
+| errors            | array     | The errors that occured (if any). |
 
 Note: if the request was successful, the response will simply be an empty JSON object.
 
@@ -370,7 +369,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | item             | object    | The item object. |
-| errors           | object    | The errors that occured (if any). |
+| errors           | array     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -418,8 +417,8 @@ Response:
 
 | Field      | Type      | Description     |
 | ---------- | --------- | --------------- |
-| items      | object    | A javascript array of items. |
-| errors     | object    | The errors that occured (if any). |
+| items      | array     | A javascript array of items. |
+| errors     | array     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -463,7 +462,7 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| errors            | object    | The errors that occured (if any). |
+| errors            | array     | The errors that occured (if any). |
 
 Note: if the request was successful, the response will simply be an empty JSON object.
 
@@ -509,7 +508,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | item             | object    | The item object. |
-| errors           | object    | The errors that occured (if any). |
+| errors           | array     | The errors that occured (if any). |
 
 
 Example Responses:
