@@ -21,7 +21,37 @@ Prerequisites
 Getting Up and Running
 ----------------------
 
-Install dependencies:
+### Just run the server
+
+If you would like to simply run the server in dev mode and don't intend to make any changes,
+after you have installed the prerequisites above, you can use two commands to install the
+server, compile and run it.
+
+First, get and compile the server code with
+
+```bash
+go get github.com/albrow/5w4g-server
+```
+
+Then start redis. Depending on your setup, you may be able to just run `redis-server`
+
+Finally, execute the binary with
+
+```
+5w4g-server
+```
+
+These instructions assume you have followed the go [post-install instructions](http://golang.org/doc/code.html).
+Most importantly, you will need to have GOPATH set and add GOPATH/bin to your PATH.
+
+
+### Modify the source code and/or run the tests
+
+If you plan to modify the source code or run the tests, you will need to follow slightly different
+instructions. First, clone this repository, then change into the root directory for the source code:
+`cd $GOPATH/src/github.com/albrow/5w4g-server`.
+
+Install all the go dependencies:
 
 ```bash
 go get ./...
@@ -35,7 +65,7 @@ Run the server:
 go run server.go
 ```
 
-If you want, you can install a tool called [fresh](https://github.com/pilu/fresh),
+It is highly recommended that you install [fresh](https://github.com/pilu/fresh),
 which will automatically restart the application when you make changes to the source
 code.
 
@@ -43,6 +73,22 @@ To run the server with fresh, just use:
 
 ```bash
 fresh
+```
+
+### Running the tests
+
+Assuming you have already cloned the repo and installed the dependencies,
+you must first start a server running in the test environment:
+
+```bash
+GO_ENV=test fresh
+```
+
+Then, with the server still running in the test environment, run the tests in a separate
+process:
+
+```
+go test ./...
 ```
 
 Runtime Environments
@@ -64,6 +110,99 @@ server error and instead prints out a generic message. This is for security reas
 Used for running tests, i.e. all the code in the tests folder will attempt to connect to a server
 running in the test environment. When running in the test environment, the database is erased everytime
 you restart the server.
+
+
+REST Endpoints
+--------------
+
+#### POST /admin/sessions
+Purpose: Create a new session (i.e., sign in) as an admin user
+
+URL Parameters: none
+
+Body Parameters:
+(fields with an asterisk are required)
+
+| Field    			 | Description     |
+| ---------------- | --------------- |
+| email\*          | The admin user's email address. Must be properly formatted. |
+| password\*       | The admin user's password. |
+
+Response:
+
+| Field    		   | Type      | Description     |
+| --------------- | --------- | --------------- |
+| admin           | object    | The admin user. Contains fields such as email and id. |
+| errors          | object    | The errors that occured (if any). |
+| message         | string    | A message from the server (if any). |
+| alreadySignedIn | boolean   | Whether or not the user was already signed in when the request was sent. | 
+
+Example Response:
+
+``` json
+{
+   "admin": {
+      "email": "admin@5w4g.com",
+      "id": "2AmRlXcIDvmc8tXVndd09p"
+   },
+   "alreadySignedIn": true,
+   "message": "You were already signed in!"
+}
+```
+
+#### DELETE /admin/sessions
+Purpose: Delete an existing session (i.e., sign out)
+
+URL Parameters: none
+
+Body Parameters: none
+
+Response:
+
+| Field    		    | Type      | Description     |
+| ---------------- | --------- | --------------- |
+| errors           | object    | The errors that occured (if any). |
+| message          | string    | A message from the server (if any). |
+| alreadySignedOut | boolean   | Whether or not the user was already signed out when the request was sent. | 
+
+Example Response:
+
+``` json
+{
+   "alreadySignedOut": false,
+   "message": "You have been signed out."
+}
+```
+
+#### GET /admin/sessions
+Purpose: Get the user data corresponding to the current session (i.e., sign out)
+
+URL Parameters: none
+
+Body Parameters: none
+
+Response:
+
+| Field    		    | Type      | Description     |
+| ---------------- | --------- | --------------- |
+| admin            | object    | The admin user. Returned iff signedIn is true. Contains fields such as email and id. |
+| errors           | object    | The errors that occured (if any). |
+| message          | string    | A message from the server (if any). |
+| signedIn         | boolean   | Whether or not the user was signed in. | 
+
+Example Response:
+
+``` json
+{
+   "admin": {
+      "email": "admin@5w4g.com",
+      "id": "2AmRlXcIDvmc8tXVndd09p"
+   },
+   "message": "You are signed in.",
+   "signedIn": true
+}
+```
+
 
 Error Codes
 -----------
