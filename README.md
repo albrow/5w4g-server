@@ -137,9 +137,9 @@ Response:
 | message         | string    | A message from the server (if any). |
 | alreadySignedIn | boolean   | Whether or not the user was already signed in when the request was sent. | 
 
-Example Response:
+Example Responses:
 
-``` json
+```json
 {
    "admin": {
       "email": "admin@5w4g.com",
@@ -147,6 +147,20 @@ Example Response:
    },
    "alreadySignedIn": true,
    "message": "You were already signed in!"
+}
+```
+
+```json
+ {
+    "errors": {
+        "email": [
+            "email is required.",
+            "email must be correctly formatted."
+        ],
+        "password": [
+            "password is required."
+        ]
+    }
 }
 ```
 
@@ -167,7 +181,7 @@ Response:
 
 Example Response:
 
-``` json
+```json
 {
    "alreadySignedOut": false,
    "message": "You have been signed out."
@@ -190,9 +204,9 @@ Response:
 | message          | string    | A message from the server (if any). |
 | signedIn         | boolean   | Whether or not the user was signed in. | 
 
-Example Response:
+Example Responses:
 
-``` json
+```json
 {
    "admin": {
       "email": "admin@5w4g.com",
@@ -203,6 +217,12 @@ Example Response:
 }
 ```
 
+```json
+{
+    "message": "You are not signed in.",
+    "signedIn": false
+}
+```
 
 Error Codes
 -----------
