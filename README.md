@@ -234,10 +234,11 @@ URL Parameters: none
 Body Parameters:
 (fields with an asterisk are required)
 
-| Field            | Description     |
-| ---------------- | --------------- |
-| email\*          | The admin user's email address. Must be properly formatted. |
-| password\*       | The admin user's password. Must be at least 8 characters long. |
+| Field             | Description     |
+| ----------------- | --------------- |
+| email\*           | The admin user's email address. Must be properly formatted. |
+| password\*        | The admin user's password. Must be at least 8 characters long. |
+| confirmPassword\* | The admin user's password again. Must match password. |
 
 Response:
 

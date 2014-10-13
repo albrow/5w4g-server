@@ -27,10 +27,15 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Parse data from request
-	adminData, err := data.Parse(req)
+	allData, err := data.Parse(req)
 	if err != nil {
 		panic(err)
 	}
+	adminMap := map[string]string{}
+	if err := allData.GetAndUnmarshalJSON("admin", &adminMap); err != nil {
+		panic(err)
+	}
+	adminData := data.CreateFromMap(adminMap)
 
 	// Validations
 	val := adminData.Validator()
@@ -38,6 +43,8 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	val.MatchEmail("email")
 	val.Require("password")
 	val.MinLength("password", 8)
+	val.Require("confirmPassword")
+	val.Equal("password", "confirmPassword")
 	if adminData.Get("email") != "" {
 		// Validate that email is unique
 		count, err := zoom.NewQuery("AdminUser").Filter("Email =", adminData.Get("email")).Count()
