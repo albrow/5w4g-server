@@ -155,5 +155,5 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Render response
-	r.JSON(res, 200, struct{})
+	r.JSON(res, 200, struct{}{})
 }
