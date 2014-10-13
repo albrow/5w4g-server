@@ -64,3 +64,30 @@ server error and instead prints out a generic message. This is for security reas
 Used for running tests, i.e. all the code in the tests folder will attempt to connect to a server
 running in the test environment. When running in the test environment, the database is erased everytime
 you restart the server.
+
+Error Codes
+-----------
+
+The following response codes will be returned by the server:
+
+**200: OK**  
+The request was successful.
+
+**401: Unauthorized**  
+The request cannot be processed without authentication. In this case the user
+should be redirected to the sign in page.
+
+**403: Forbidden**  
+The user is trying to send a request which he/she is not authorized to send.
+An example would be a non-admin user trying to create or remove items.
+
+**422: Unprocessable Entity**  
+The paramaters for the request were either incorrect or improperly formatted.
+You should check the errors field to find out what went wrong and display the
+error(s) to the user.
+
+**500: Internal Server Error**  
+An error occured on the server-server side. Will always return an errors field
+in the JSON response which contains details about the error. If the runtime environment
+is set to production, all internal server errors will simply contain the text: "Sorry
+there was a problem." for security reasons.
