@@ -5,6 +5,7 @@ import (
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
+	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
 	"net/http"
 )
@@ -98,7 +99,58 @@ func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) 
 		panic(err)
 	}
 
-	// render response
+	// Render response
 	dataMap := map[string]interface{}{"admins": admins}
 	r.JSON(res, 200, dataMap)
+}
+
+func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request) {
+	r := render.New(render.Options{})
+
+	// Make sure we're signed in
+	currentUser := CurrentAdminUser(req)
+	if currentUser == nil {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"You need to be signed in to do that!"},
+			},
+		}
+		r.JSON(res, 401, jsonData)
+		return
+	}
+
+	// Get the id from the url
+	vars := mux.Vars(req)
+	id, found := vars["id"]
+	if !found {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"Missing required url parameter: id"},
+			},
+		}
+		r.JSON(res, 422, jsonData)
+		return
+	}
+
+	// Sanity check. (You can't delete yourself)
+	if currentUser.Id == id {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"You can't delete yourself, bro!"},
+			},
+		}
+		r.JSON(res, 422, jsonData)
+		return
+	}
+
+	// Delete from database
+	if err := zoom.DeleteById("AdminUser", id); err != nil {
+		panic(err)
+	}
+
+	// Render response
+	jsonData := map[string]interface{}{
+		"message": "Admin user was deleted.",
+	}
+	r.JSON(res, 200, jsonData)
 }
