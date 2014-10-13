@@ -74,7 +74,7 @@ func Init() {
 	} else {
 		panic("Unkown environment. Don't know what configuration to use!")
 	}
-	fmt.Printf("[config] Running in %s environment...", Env)
+	fmt.Printf("[config] Running in %s environment...\n", Env)
 }
 
 func Use(c config) {
