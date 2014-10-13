@@ -77,3 +77,28 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	}
 	r.JSON(res, 200, jsonData)
 }
+
+func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) {
+	r := render.New(render.Options{})
+
+	// Make sure we're signed in
+	if currentUser := CurrentAdminUser(req); currentUser == nil {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"You need to be signed in to do that!"},
+			},
+		}
+		r.JSON(res, 401, jsonData)
+		return
+	}
+
+	// Find all admin users in the database
+	var admins []*models.AdminUser
+	if err := zoom.NewQuery("AdminUser").Scan(&admins); err != nil {
+		panic(err)
+	}
+
+	// render response
+	dataMap := map[string]interface{}{"admins": admins}
+	r.JSON(res, 200, dataMap)
+}

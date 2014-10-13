@@ -36,6 +36,7 @@ func main() {
 	adminRouter.HandleFunc("/sessions", adminSessions.Show).Methods("GET")
 	adminUsers := controllers.AdminUsersController{}
 	adminRouter.HandleFunc("/users", adminUsers.Create).Methods("POST")
+	adminRouter.HandleFunc("/users", adminUsers.Index).Methods("GET")
 	n.UseHandler(router)
 
 	// Run

@@ -273,6 +273,44 @@ Example Responses:
 }
 ```
 
+#### GET /admin/users
+**Requires Admin Authentication**
+
+Purpose: List all existing admin users
+
+URL Parameters: none
+
+Body Parameters: none
+
+Response:
+
+| Field             | Type      | Description     |
+| ----------------- | --------- | --------------- |
+| admins            | object    | A javascript array of admin users. Each contains fields such as email and id. |
+| errors            | object    | The errors that occured (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "admins": [
+        {
+            "email": "admin@5w4g.com",
+            "id": "2AmRlXcIDvmc8tXVndd09p"
+        },
+        {
+            "email": "a@b.c",
+            "id": "DnlK3zdiqsv6Hwzdnddajl"
+        },
+        {
+            "email": "new@example.com",
+            "id": "OQyxUYZU2Cd2pgRFnddabo"
+        }
+    ]
+}
+```
+
 Error Codes
 -----------
 
