@@ -80,8 +80,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 
 	// Render response
 	jsonData := map[string]interface{}{
-		"admin":   admin,
-		"message": "New admin user created!",
+		"admin": admin,
 	}
 	r.JSON(res, 200, jsonData)
 }
@@ -156,8 +155,5 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Render response
-	jsonData := map[string]interface{}{
-		"message": "Admin user was deleted.",
-	}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, struct{})
 }
