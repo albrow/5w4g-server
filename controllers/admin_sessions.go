@@ -20,8 +20,9 @@ func (c *AdminSessionsController) Create(res http.ResponseWriter, req *http.Requ
 	// Check if admin is already signed in
 	if admin := CurrentAdminUser(req); admin != nil {
 		r.JSON(res, 200, map[string]interface{}{
-			"admin":   admin,
-			"message": "You were already signed in!",
+			"admin":           admin,
+			"message":         "You were already signed in!",
+			"alreadySignedIn": true,
 		})
 		return
 	}
@@ -76,8 +77,9 @@ func (c *AdminSessionsController) Create(res http.ResponseWriter, req *http.Requ
 	session := sessions.GetSession(req)
 	session.Set("auth_token", fmt.Sprintf("%s:%s", admin.Email, admin.HashedPassword))
 	r.JSON(res, 200, map[string]interface{}{
-		"admin":   admin,
-		"message": "You are now signed in.",
+		"admin":           admin,
+		"message":         "You are now signed in.",
+		"alreadySignedIn": false,
 	})
 }
 
@@ -87,7 +89,8 @@ func (c *AdminSessionsController) Delete(res http.ResponseWriter, req *http.Requ
 	// Check if admin is already signed in
 	if admin := CurrentAdminUser(req); admin == nil {
 		r.JSON(res, 200, map[string]interface{}{
-			"message": "You were already signed out!",
+			"message":          "You were already signed out!",
+			"alreadySignedOut": true,
 		})
 		return
 	}
@@ -95,7 +98,10 @@ func (c *AdminSessionsController) Delete(res http.ResponseWriter, req *http.Requ
 	// Delete auth_token from the session data
 	session := sessions.GetSession(req)
 	session.Delete("auth_token")
-	r.JSON(res, 200, map[string]interface{}{"message": "You have been signed out."})
+	r.JSON(res, 200, map[string]interface{}{
+		"message":          "You have been signed out.",
+		"alreadySignedOut": false,
+	})
 }
 
 func CurrentAdminUser(req *http.Request) *models.AdminUser {
