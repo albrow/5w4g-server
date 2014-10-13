@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/albrow/5w4g-server/config"
 	"github.com/albrow/5w4g-server/controllers"
 	"github.com/albrow/5w4g-server/models"
+	"github.com/albrow/negroni-json-recovery"
 	"github.com/codegangsta/negroni"
 	"github.com/goincremental/negroni-sessions"
 	"github.com/gorilla/mux"
@@ -26,6 +28,18 @@ func main() {
 	}))
 	store := sessions.NewCookieStore(config.Secret)
 	n.Use(sessions.Sessions("5w4g_session", store))
+	recovery.Formatter = func(errMsg string, stack []byte, file string, line int, fullMessages bool) interface{} {
+		result := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{errMsg},
+			},
+		}
+		if fullMessages {
+			result["lineNumber"] = fmt.Sprintf("%s:%d", file, line)
+		}
+		return result
+	}
+	n.Use(recovery.JSONRecovery(config.Env != "production"))
 
 	// Define routes
 	router := mux.NewRouter()
