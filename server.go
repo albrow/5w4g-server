@@ -22,7 +22,7 @@ func main() {
 	n.UseHandler(cors.Allow(&cors.Options{
 		AllowOrigins:     config.AllowOrigins,
 		AllowMethods:     []string{"GET", "POST", "DELETE", "PUT", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))
