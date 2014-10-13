@@ -30,8 +30,9 @@ func main() {
 	// Define routes
 	router := mux.NewRouter()
 	adminRouter := router.PathPrefix("/admin").Subrouter()
-	adminUsers := controllers.AdminUserController{}
-	adminRouter.HandleFunc("/sign_in", adminUsers.SignIn).Methods("POST")
+	adminSessions := controllers.AdminSessionsController{}
+	adminRouter.HandleFunc("/sessions", adminSessions.Create).Methods("POST")
+	adminRouter.HandleFunc("/sessions", adminSessions.Delete).Methods("DELETE")
 	n.UseHandler(router)
 
 	// Run
