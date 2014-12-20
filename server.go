@@ -21,7 +21,7 @@ func main() {
 	n.UseHandler(cors.Allow(&cors.Options{
 		AllowOrigins:     config.AllowOrigins,
 		AllowMethods:     []string{"GET", "POST", "DELETE", "PUT", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "X-Requested-With"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "X-Requested-With", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))
