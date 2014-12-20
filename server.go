@@ -7,7 +7,6 @@ import (
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/negroni-json-recovery"
 	"github.com/codegangsta/negroni"
-	"github.com/goincremental/negroni-sessions"
 	"github.com/gorilla/mux"
 	"github.com/martini-contrib/cors"
 )
@@ -26,8 +25,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	store := sessions.NewCookieStore(config.Secret)
-	n.Use(sessions.Sessions("5w4g_session", store))
 
 	// Set up recovery middleware
 	recovery.StackDepth = 3
