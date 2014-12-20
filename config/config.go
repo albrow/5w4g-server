@@ -2,16 +2,20 @@ package config
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
 var Env string = os.Getenv("GO_ENV")
 
-var Secret []byte
-var Host string
-var Port string
-var AllowOrigins []string
-var Db dbConfig
+var (
+	Secret       []byte
+	Host         string
+	Port         string
+	AllowOrigins []string
+	Db           dbConfig
+	PrivateKey   []byte
+)
 
 type config struct {
 	Secret       []byte
@@ -74,7 +78,16 @@ func Init() {
 	} else {
 		panic("Unkown environment. Don't know what configuration to use!")
 	}
+	readPrivateKey()
 	fmt.Printf("[config] Running in %s environment...\n", Env)
+}
+
+func readPrivateKey() {
+	if key, err := ioutil.ReadFile("config/id.rsa"); err != nil {
+		panic(err)
+	} else {
+		PrivateKey = key
+	}
 }
 
 func Use(c config) {

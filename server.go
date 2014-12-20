@@ -44,10 +44,8 @@ func main() {
 	// Define routes
 	router := mux.NewRouter()
 	adminRouter := router.PathPrefix("/admin").Subrouter()
-	adminSessions := controllers.AdminSessionsController{}
-	adminRouter.HandleFunc("/sessions", adminSessions.Create).Methods("POST")
-	adminRouter.HandleFunc("/sessions", adminSessions.Delete).Methods("DELETE")
-	adminRouter.HandleFunc("/sessions", adminSessions.Show).Methods("GET")
+	adminTokens := controllers.AdminTokensController{}
+	adminRouter.HandleFunc("/sign_in", adminTokens.Create).Methods("POST")
 	adminUsers := controllers.AdminUsersController{}
 	adminRouter.HandleFunc("/users", adminUsers.Create).Methods("POST")
 	adminRouter.HandleFunc("/users", adminUsers.Index).Methods("GET")
