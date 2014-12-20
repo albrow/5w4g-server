@@ -1,2 +1,4 @@
 tmp
 dump.rdb
+config/id.rsa
+config/id.rsa.pub
