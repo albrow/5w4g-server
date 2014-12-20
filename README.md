@@ -174,7 +174,7 @@ Response:
 | Field           | Type      | Description     |
 | --------------- | --------- | --------------- |
 | token           | string    | A JSON Web Token which can be used for authentication of future requests. |
-| errors          | array     | The errors that occured (if any). |
+| errors          | object    | The errors that occured (if any). |
 
 
 
@@ -221,7 +221,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | admin            | object    | The admin user. Contains fields such as email and id. |
-| errors           | array     | The errors that occured (if any). |
+| errors           | object     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -262,7 +262,7 @@ Response:
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
 | admins            | array     | A javascript array of admin users. Each contains fields such as email and id. |
-| errors            | array     | The errors that occured (if any). |
+| errors            | object     | The errors that occured (if any). |
 
 
 Example Responses:
@@ -303,7 +303,7 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| errors            | array     | The errors that occured (if any). |
+| errors            | object    | The errors that occured (if any). |
 
 Note: if the request was successful, the response will simply be an empty JSON object.
 
@@ -345,7 +345,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | item             | object    | The item object. |
-| errors           | array     | The errors that occured (if any). |
+| errors           | object    | The errors that occured (if any). |
 
 
 Example Responses:
@@ -398,7 +398,7 @@ Response:
 | Field             | Type      | Description      |
 | ----------------- | --------- | ---------------- |
 | item              | object    | The item object. |
-| errors            | array     | The errors that occured (if any). |
+| errors            | object    | The errors that occured (if any). |
 
 Note: if the request was successful, the response will simply be an empty JSON object.
 
@@ -440,7 +440,7 @@ Response:
 | Field      | Type      | Description     |
 | ---------- | --------- | --------------- |
 | items      | array     | A javascript array of items. |
-| errors     | array     | The errors that occured (if any). |
+| errors     | object    | The errors that occured (if any). |
 
 
 Example Responses:
@@ -484,7 +484,7 @@ Response:
 
 | Field             | Type      | Description     |
 | ----------------- | --------- | --------------- |
-| errors            | array     | The errors that occured (if any). |
+| errors            | object    | The errors that occured (if any). |
 
 Note: if the request was successful, the response will simply be an empty JSON object.
 
@@ -530,7 +530,7 @@ Response:
 | Field            | Type      | Description     |
 | ---------------- | --------- | --------------- |
 | item             | object    | The item object. |
-| errors           | array     | The errors that occured (if any). |
+| errors           | object    | The errors that occured (if any). |
 
 
 Example Responses:
