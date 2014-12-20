@@ -96,27 +96,6 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	})
 }
 
-func (c *AdminTokensController) Delete(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
-
-	// Check if admin is already signed in
-	if admin := CurrentAdminUser(req); admin == nil {
-		r.JSON(res, http.StatusOK, map[string]interface{}{
-			"message":          "You were already signed out!",
-			"alreadySignedOut": true,
-		})
-		return
-	}
-
-	// Delete auth_token from the session data
-	session := sessions.GetSession(req)
-	session.Delete("auth_token")
-	r.JSON(res, http.StatusOK, map[string]interface{}{
-		"message":          "You have been signed out.",
-		"alreadySignedOut": false,
-	})
-}
-
 func CurrentAdminUser(req *http.Request) *models.AdminUser {
 	// TODO: rewrite this!
 	return nil
