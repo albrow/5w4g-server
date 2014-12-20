@@ -28,6 +28,9 @@ func main() {
 	}))
 	store := sessions.NewCookieStore(config.Secret)
 	n.Use(sessions.Sessions("5w4g_session", store))
+
+	// Set up recovery middleware
+	recovery.StackDepth = 3
 	recovery.Formatter = func(errMsg string, stack []byte, file string, line int, fullMessages bool) interface{} {
 		result := map[string]interface{}{
 			"errors": map[string][]string{
