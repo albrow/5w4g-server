@@ -200,37 +200,6 @@ Example Responses:
 }
 ```
 
-#### GET /admin/users/:id
-**Requires Admin Authentication**
-
-Purpose: Get an existing admin user
-
-URL Parameters:
-
-| Field         | Description     |
-| ------------- | --------------- |
-| id\*          | The id of the admin user you want to get |
-
-Body Parameters: none
-
-Response:
-
-| Field             | Type      | Description     |
-| ----------------- | --------- | --------------- |
-| admin             | object    | The admin with the given id. |
-| errors            | object    | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "email": "admin@5w4g.com",
-    "id": "TaWcnM9r27Xx9ZgBnddbc2"
-}
-```
-
-
 #### POST /admin/users
 **Requires Admin Authentication**
 
@@ -276,6 +245,36 @@ Example Responses:
             "password must be at least 8 characters long."
         ]
     }
+}
+```
+
+#### GET /admin/users/:id
+**Requires Admin Authentication**
+
+Purpose: Get an existing admin user
+
+URL Parameters:
+
+| Field         | Description     |
+| ------------- | --------------- |
+| id\*          | The id of the admin user you want to get |
+
+Body Parameters: none
+
+Response:
+
+| Field             | Type      | Description     |
+| ----------------- | --------- | --------------- |
+| admin             | object    | The admin with the given id. |
+| errors            | object    | The errors that occured (if any). |
+
+
+Example Responses:
+
+```json
+{
+    "email": "admin@5w4g.com",
+    "id": "TaWcnM9r27Xx9ZgBnddbc2"
 }
 ```
 
