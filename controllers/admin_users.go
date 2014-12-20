@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"code.google.com/p/go.crypto/bcrypt"
+	"fmt"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
@@ -78,6 +79,57 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 		"admin": admin,
 	}
 	r.JSON(res, 200, jsonData)
+}
+
+func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
+	r := render.New(render.Options{})
+
+	// Make sure we're signed in
+	currentUser := CurrentAdminUser(req)
+	if currentUser == nil {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"You need to be signed in to do that!"},
+			},
+		}
+		r.JSON(res, 401, jsonData)
+		return
+	}
+
+	// Get the id from the url
+	vars := mux.Vars(req)
+	id, found := vars["id"]
+	if !found {
+		jsonData := map[string]interface{}{
+			"errors": map[string][]string{
+				"error": []string{"Missing required url parameter: id"},
+			},
+		}
+		r.JSON(res, 422, jsonData)
+		return
+	}
+
+	// Get the admin user from the database
+	admin := &models.AdminUser{}
+	if err := zoom.ScanById(id, admin); err != nil {
+		if _, ok := err.(*zoom.KeyNotFoundError); ok {
+			// This means an admin user with the given id was not found
+			msg := fmt.Sprintf("Could not find admin user with id = %s", id)
+			jsonData := map[string]interface{}{
+				"errors": map[string][]string{
+					"error": []string{msg},
+				},
+			}
+			r.JSON(res, 422, jsonData)
+			return
+		} else {
+			// This means there was some other error
+			panic(err)
+		}
+	}
+
+	// Render response
+	r.JSON(res, 200, admin)
 }
 
 func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) {
