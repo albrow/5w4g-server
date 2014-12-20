@@ -103,12 +103,41 @@ process:
 go test ./...
 ```
 
+Authentication
+--------------
+
+5w4g-server uses
+[JSON Web Tokens](https://developer.atlassian.com/static/connect/docs/concepts/understanding-jwt.html)
+(JWTs) for authentication. When you sign in, the server will respond with a token which
+the client is responsible for storing. For authenticated requests, you should include
+an `Authorization` header, the value of which should be the word "Bearer" followed by a space
+and then the full JWT. For example:
+
+```
+GET /resource HTTP/1.1
+Host: server.example.com
+Authorization: Bearer mF_9.B5f-4.1JqM
+```
+
+The tokens issued by 5w4g-server include the following claims:
+
+| Claim            | Description     |
+| ---------------- | --------------- |
+| adminId          | A unique identifier for an admin user |
+| exp              | The expiration date of the token, as UTC unix time |
+| ita              | The time the token was originally issued, as UTC unix time |
+
+The claims are unencrypted, but protected from modification by a signature. Clients can
+read a stored token to determine the adminId and whether or not it is expired.
+
 Runtime Environments
 --------------------
 
-The 5w4g server has 3 different runtime environments, each of which uses a different database and runs on a different port.
-The environments are configured in config/config.go. You can change the runtime environment with the `GO_ENV` variable. So, for
-example to run in the test environment, run `GO_ENV=test go run server.go` or `GO_ENV=test fresh`
+The 5w4g server has 3 different runtime environments, each of which uses a different
+database and runs on a different port. The environments are configured in config/config.go.
+You can change the runtime environment with the `GO_ENV` variable. So, for
+example to run in the test environment, run `GO_ENV=test go run server.go` or
+`GO_ENV=test fresh`
 
 #### Development
 The default environment if none is specified. Used for development on a local machine. Not for use on a
@@ -127,8 +156,8 @@ you restart the server.
 REST Endpoints
 --------------
 
-#### POST /admin/sessions
-Purpose: Create a new session (i.e., sign in) as an admin user
+#### POST /admin/sign_in
+Purpose: Sign in an admin user (i.e. get a fresh, valid token)
 
 URL Parameters: none
 
@@ -144,26 +173,21 @@ Response:
 
 | Field           | Type      | Description     |
 | --------------- | --------- | --------------- |
-| admin           | object    | The admin user. Contains fields such as email and id. |
+| token           | string    | A JSON Web Token which can be used for authentication of future requests. |
 | errors          | array     | The errors that occured (if any). |
-| message         | string    | A message from the server (if any). |
-| alreadySignedIn | boolean   | Whether or not the user was already signed in when the request was sent. | 
+
+
 
 Example Responses:
 
 ```json
 {
-   "admin": {
-      "email": "admin@5w4g.com",
-      "id": "2AmRlXcIDvmc8tXVndd09p"
-   },
-   "alreadySignedIn": true,
-   "message": "You were already signed in!"
+"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiVGFXY25NOXIyN1h4OVpnQm5kZGJjMiIsImV4cCI6MTQyMTY5ODQyMSwiaWF0IjoxNDE5MTA2NDIxfQ.0_GtGwP3XGwcFIYnF2EcKNUbl3bRKRgYvWCCF89uxes"
 }
 ```
 
 ```json
- {
+{
     "errors": {
         "email": [
             "email is required.",
@@ -173,66 +197,6 @@ Example Responses:
             "password is required."
         ]
     }
-}
-```
-
-#### DELETE /admin/sessions
-Purpose: Delete an existing session (i.e., sign out)
-
-URL Parameters: none
-
-Body Parameters: none
-
-Response:
-
-| Field            | Type      | Description     |
-| ---------------- | --------- | --------------- |
-| errors           | array     | The errors that occured (if any). |
-| message          | string    | A message from the server (if any). |
-| alreadySignedOut | boolean   | Whether or not the user was already signed out when the request was sent. | 
-
-Example Response:
-
-```json
-{
-   "alreadySignedOut": false,
-   "message": "You have been signed out."
-}
-```
-
-#### GET /admin/sessions
-Purpose: Get the user data corresponding to the current session (i.e., sign out)
-
-URL Parameters: none
-
-Body Parameters: none
-
-Response:
-
-| Field    		    | Type      | Description     |
-| ---------------- | --------- | --------------- |
-| admin            | object    | The admin user. Returned iff signedIn is true. Contains fields such as email and id. |
-| errors           | array     | The errors that occured (if any). |
-| message          | string    | A message from the server (if any). |
-| signedIn         | boolean   | Whether or not the user was signed in. | 
-
-Example Responses:
-
-```json
-{
-   "admin": {
-      "email": "admin@5w4g.com",
-      "id": "2AmRlXcIDvmc8tXVndd09p"
-   },
-   "message": "You are signed in.",
-   "signedIn": true
-}
-```
-
-```json
-{
-    "message": "You are not signed in.",
-    "signedIn": false
 }
 ```
 
