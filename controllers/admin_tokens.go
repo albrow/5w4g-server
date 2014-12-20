@@ -7,7 +7,6 @@ import (
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/goincremental/negroni-sessions"
 	"github.com/unrolled/render"
 	"net/http"
 	"time"
@@ -17,16 +16,6 @@ type AdminTokensController struct{}
 
 func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
-
-	// Check if admin is already signed in
-	if admin := CurrentAdminUser(req); admin != nil {
-		r.JSON(res, http.StatusOK, map[string]interface{}{
-			"admin":           admin,
-			"message":         "You were already signed in!",
-			"alreadySignedIn": true,
-		})
-		return
-	}
 
 	// Parse request body
 	adminData, err := data.Parse(req)
@@ -79,11 +68,12 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	token := jwt.New(jwt.SigningMethodHS256)
 	// Store some claims in the token
 	token.Claims["adminId"] = admin.Id
-	// Expires 30 days from now
-	token.Claims["exp"] = time.Now().Add(24 * time.Hour * 30)
+	now := time.Now().UTC()
+	// Expires 30 days from now. Formatted as unix time in UTC
+	token.Claims["exp"] = now.Add(24 * time.Hour * 30).Unix()
 	// iat is the time the token was created. We can use this to revoke tokens
 	// created before a certain time (the time an account was compromised).
-	token.Claims["iat"] = time.Now()
+	token.Claims["iat"] = now.Unix()
 
 	// Sign the token with our private key
 	signedToken, err := token.SignedString(config.PrivateKey)
@@ -94,9 +84,4 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	r.JSON(res, http.StatusOK, map[string]interface{}{
 		"token": signedToken,
 	})
-}
-
-func CurrentAdminUser(req *http.Request) *models.AdminUser {
-	// TODO: rewrite this!
-	return nil
 }
