@@ -21,6 +21,18 @@ Prerequisites
 Getting Up and Running
 ----------------------
 
+### Generating RSA Keys
+
+5w4g-server uses JSON Web Tokens for authentication. To sign the tokens, you will need to
+generate id.rsa and id.rsa.pub files in the config directory. Do this with the following
+commands on a unix-type system:
+
+``` bash
+openssl genrsa -out config/id.rsa 1024 
+openssl rsa -in config/id.rsa -pubout > config/id.rsa.pub 
+```
+
+
 ### Just run the server
 
 If you would like to simply run the server in dev mode and don't intend to make any changes,
