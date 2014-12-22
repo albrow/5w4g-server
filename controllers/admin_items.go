@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
@@ -15,13 +16,8 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
-	if currentUser := CurrentAdminUser(req); currentUser == nil {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You need to be signed in to do that!"},
-			},
-		}
-		r.JSON(res, 401, jsonData)
+	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+		r.JSON(res, 401, lib.ErrUnauthorized)
 		return
 	}
 
@@ -78,13 +74,8 @@ func (c AdminItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
-	if currentUser := CurrentAdminUser(req); currentUser == nil {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You need to be signed in to do that!"},
-			},
-		}
-		r.JSON(res, 401, jsonData)
+	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+		r.JSON(res, 401, lib.ErrUnauthorized)
 		return
 	}
 
@@ -116,13 +107,8 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
-	if currentUser := CurrentAdminUser(req); currentUser == nil {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You need to be signed in to do that!"},
-			},
-		}
-		r.JSON(res, 401, jsonData)
+	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+		r.JSON(res, 401, lib.ErrUnauthorized)
 		return
 	}
 
@@ -218,14 +204,8 @@ func (c AdminItemsController) Delete(res http.ResponseWriter, req *http.Request)
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
-	currentUser := CurrentAdminUser(req)
-	if currentUser == nil {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You need to be signed in to do that!"},
-			},
-		}
-		r.JSON(res, 401, jsonData)
+	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+		r.JSON(res, 401, lib.ErrUnauthorized)
 		return
 	}
 
@@ -255,13 +235,8 @@ func (c AdminItemsController) Index(res http.ResponseWriter, req *http.Request) 
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
-	if currentUser := CurrentAdminUser(req); currentUser == nil {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You need to be signed in to do that!"},
-			},
-		}
-		r.JSON(res, 401, jsonData)
+	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+		r.JSON(res, 401, lib.ErrUnauthorized)
 		return
 	}
 
