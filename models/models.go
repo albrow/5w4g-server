@@ -44,9 +44,6 @@ func (i *Identifier) SetId(id string) {
 }
 
 func CreateDefaultAdminUser() error {
-	if config.Env == "test" {
-		return nil
-	}
 	admins := []*AdminUser{}
 	if err := zoom.NewQuery("AdminUser").Scan(&admins); err != nil {
 		return err

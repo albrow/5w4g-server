@@ -46,7 +46,12 @@ func getAdminTestToken() (string, error) {
 	// Sign the token with our testing private key.
 	// Since this is strictly for testing purposes, it is okay
 	// to use a non-random, non-private key here.
-	return token.SignedString("TEST_PRIVATE_KEY")
+	if token, err := token.SignedString("TEST_PRIVATE_KEY"); err != nil {
+		return token, err
+	} else {
+		adminTestToken = token
+		return token, nil
+	}
 }
 
 func getAdminTestUser() (*models.AdminUser, error) {
@@ -56,6 +61,7 @@ func getAdminTestUser() (*models.AdminUser, error) {
 	}
 
 	// Otherwise get the user from the database
+	models.Init()
 	admin := &models.AdminUser{}
 	if err := zoom.NewQuery("AdminUser").Filter("Email =", "admin@5w4g.com").ScanOne(admin); err != nil {
 		if _, ok := err.(*zoom.ModelNotFoundError); ok {
@@ -70,5 +76,6 @@ func getAdminTestUser() (*models.AdminUser, error) {
 			return nil, err
 		}
 	}
+	adminTestUser = admin
 	return admin, nil
 }
