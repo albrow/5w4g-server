@@ -83,12 +83,7 @@ func (c AdminItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id, found := vars["id"]
 	if !found {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"Missing required url parameter: id"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
 		return
 	}
 
@@ -116,12 +111,7 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	vars := mux.Vars(req)
 	id, found := vars["id"]
 	if !found {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"Missing required url parameter: id"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
 		return
 	}
 
@@ -213,12 +203,7 @@ func (c AdminItemsController) Delete(res http.ResponseWriter, req *http.Request)
 	vars := mux.Vars(req)
 	id, found := vars["id"]
 	if !found {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"Missing required url parameter: id"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
 		return
 	}
 

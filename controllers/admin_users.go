@@ -90,12 +90,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id, found := vars["id"]
 	if !found {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"Missing required url parameter: id"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
 		return
 	}
 
@@ -105,12 +100,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 		if _, ok := err.(*zoom.KeyNotFoundError); ok {
 			// This means an admin user with the given id was not found
 			msg := fmt.Sprintf("Could not find admin user with id = %s", id)
-			jsonData := map[string]interface{}{
-				"errors": map[string][]string{
-					"error": []string{msg},
-				},
-			}
-			r.JSON(res, 422, jsonData)
+			r.JSON(res, 422, lib.NewJsonError(msg))
 			return
 		} else {
 			// This means there was some other error
@@ -156,23 +146,13 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 	vars := mux.Vars(req)
 	id, found := vars["id"]
 	if !found {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"Missing required url parameter: id"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
 		return
 	}
 
 	// Sanity check. (You can't delete yourself)
 	if currentUser.Id == id {
-		jsonData := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{"You can't delete yourself, bro!"},
-			},
-		}
-		r.JSON(res, 422, jsonData)
+		r.JSON(res, 422, lib.NewJsonError("You can't delete yourself, dummy!"))
 		return
 	}
 
