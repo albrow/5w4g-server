@@ -21,18 +21,6 @@ Prerequisites
 Getting Up and Running
 ----------------------
 
-### Generating RSA Keys
-
-5w4g-server uses JSON Web Tokens for authentication. To sign the tokens, you will need to
-generate id.rsa and id.rsa.pub files in the config directory. Do this with the following
-commands on a unix-type system:
-
-``` bash
-openssl genrsa -out config/id.rsa 1024 
-openssl rsa -in config/id.rsa -pubout > config/id.rsa.pub 
-```
-
-
 ### Just run the server
 
 If you would like to simply run the server in dev mode and don't intend to make any changes,
@@ -129,6 +117,20 @@ The tokens issued by 5w4g-server include the following claims:
 
 The claims are unencrypted, but protected from modification by a signature. Clients can
 read a stored token to determine the adminId and whether or not it is expired.
+
+
+### Generating RSA Keys
+
+5w4g-server uses JSON Web Tokens for authentication. To sign the tokens, you will need files
+containing private and public keys. Private keys for the development and test runtime environments
+have already been created for you and are included in the config folder. To run in production, you will
+need to generate your own keys and keep them private. Do this with the following commands on a
+unix-type system:
+
+``` bash
+openssl genrsa -out config/id.rsa 1024 
+openssl rsa -in config/id.rsa -pubout > config/id.rsa.pub 
+```
 
 Runtime Environments
 --------------------
