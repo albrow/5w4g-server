@@ -22,9 +22,17 @@ var (
 	// It is created as needed with the getAdminTestUser function,
 	// stored in the test database, and reused for successive tests.
 	adminTestUser *models.AdminUser = nil
+	// whether or not config has been initialized
+	configIsInit = false
 )
 
 func getAdminTestToken() (string, error) {
+	if !configIsInit {
+		config.Env = "test"
+		config.Init()
+		configIsInit = true
+	}
+
 	// If adminTestToken was previously created, return it
 	if adminTestToken != "" {
 		return adminTestToken, nil
@@ -44,9 +52,7 @@ func getAdminTestToken() (string, error) {
 	token.Claims["iat"] = now.Unix()
 
 	// Sign the token with our testing private key.
-	// Since this is strictly for testing purposes, it is okay
-	// to use a non-random, non-private key here.
-	if token, err := token.SignedString("TEST_PRIVATE_KEY"); err != nil {
+	if token, err := token.SignedString(config.PrivateKey); err != nil {
 		return token, err
 	} else {
 		adminTestToken = token
@@ -55,6 +61,12 @@ func getAdminTestToken() (string, error) {
 }
 
 func getAdminTestUser() (*models.AdminUser, error) {
+	if !configIsInit {
+		config.Env = "test"
+		config.Init()
+		configIsInit = true
+	}
+
 	// If adminTestUser was previously created, return it
 	if adminTestUser != nil {
 		return adminTestUser, nil

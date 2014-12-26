@@ -22,6 +22,14 @@ func Init() {
 		}
 	}
 
+	// If we're in test environment, flush the database on startup
+	if config.Env == "test" {
+		conn := zoom.GetConn()
+		if _, err := conn.Do("FLUSHDB"); err != nil {
+			panic(err)
+		}
+	}
+
 	// Create a default admin user if needed
 	if err := CreateDefaultAdminUser(); err != nil {
 		panic(err)

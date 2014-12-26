@@ -4,25 +4,31 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
-var Env string = os.Getenv("GO_ENV")
+var (
+	Env     = os.Getenv("GO_ENV")
+	AppRoot = filepath.Join(os.Getenv("GOPATH"), "src", "github.com", "albrow", "5w4g-server")
+)
 
 var (
-	Secret       []byte
-	Host         string
-	Port         string
-	AllowOrigins []string
-	Db           dbConfig
-	PrivateKey   []byte
+	Secret         []byte
+	Host           string
+	Port           string
+	AllowOrigins   []string
+	Db             dbConfig
+	PrivateKey     []byte
+	PrivateKeyFile string
 )
 
 type config struct {
-	Secret       []byte
-	Host         string
-	Port         string
-	AllowOrigins []string
-	Db           dbConfig
+	Secret         []byte
+	Host           string
+	Port           string
+	AllowOrigins   []string
+	PrivateKeyFile string
+	Db             dbConfig
 }
 
 type dbConfig struct {
@@ -32,10 +38,11 @@ type dbConfig struct {
 }
 
 var Prod config = config{
-	Secret:       []byte(""), // TODO: Set secret based on environment variable
-	Host:         "",         // TODO: Set this to our api domain
-	Port:         "8080",
-	AllowOrigins: []string{"5w4g.com", "admin.5w4g.com"}, // TODO: Only allow requests from our static content domain
+	Secret:         []byte(""), // TODO: Set secret based on environment variable
+	Host:           "",         // TODO: Set this to our api domain
+	Port:           "8080",
+	AllowOrigins:   []string{"5w4g.com", "admin.5w4g.com"}, // TODO: Only allow requests from our static content domain
+	PrivateKeyFile: filepath.Join(AppRoot, "config", "id.rsa"),
 	Db: dbConfig{
 		Address:  "", // TODO: Set to our redis server domain
 		Network:  "tcp",
@@ -44,10 +51,11 @@ var Prod config = config{
 }
 
 var Dev config = config{
-	Secret:       []byte("5776cb45330d129c6f28e82ff4d9868ac9917def536dfa9f5680bf1c6a8a3f2e"),
-	Host:         "localhost",
-	Port:         "3000",
-	AllowOrigins: []string{"*"},
+	Secret:         []byte("5776cb45330d129c6f28e82ff4d9868ac9917def536dfa9f5680bf1c6a8a3f2e"),
+	Host:           "localhost",
+	Port:           "3000",
+	AllowOrigins:   []string{"*"},
+	PrivateKeyFile: filepath.Join(AppRoot, "config", "dev_id.rsa"),
 	Db: dbConfig{
 		Address:  "localhost:6379",
 		Network:  "tcp",
@@ -56,10 +64,11 @@ var Dev config = config{
 }
 
 var Test config = config{
-	Secret:       []byte("1bc217e1e32d91b1769ae3d15a0f2f65138b84e51bf63f574707eb56304023fb"),
-	Host:         "localhost",
-	Port:         "4000",
-	AllowOrigins: []string{"*"},
+	Secret:         []byte("1bc217e1e32d91b1769ae3d15a0f2f65138b84e51bf63f574707eb56304023fb"),
+	Host:           "localhost",
+	Port:           "4000",
+	AllowOrigins:   []string{"*"},
+	PrivateKeyFile: filepath.Join(AppRoot, "config", "test_id.rsa"),
 	Db: dbConfig{
 		Address:  "localhost:6379",
 		Network:  "tcp",
@@ -83,7 +92,7 @@ func Init() {
 }
 
 func readPrivateKey() {
-	if key, err := ioutil.ReadFile("config/id.rsa"); err != nil {
+	if key, err := ioutil.ReadFile(PrivateKeyFile); err != nil {
 		panic(err)
 	} else {
 		PrivateKey = key
@@ -95,5 +104,6 @@ func Use(c config) {
 	Host = c.Host
 	Port = c.Port
 	AllowOrigins = c.AllowOrigins
+	PrivateKeyFile = c.PrivateKeyFile
 	Db = c.Db
 }
