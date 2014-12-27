@@ -136,9 +136,6 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	if itemData.KeyExists("name") {
 		val.Require("name").Message("name cannot be blank")
 	}
-	if itemData.KeyExists("imageUrl") {
-		val.Require("imageUrl").Message("imageUrl cannot be blank")
-	}
 	if itemData.KeyExists("price") {
 		val.Require("price").Message("price cannot be blank")
 		val.Greater("price", 0.0)
@@ -164,6 +161,7 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 			}
 		}
 	}
+	// TODO: check for a valid image file
 	if val.HasErrors() {
 		errors := map[string]interface{}{
 			"errors": val.ErrorMap(),
@@ -179,6 +177,7 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Update the item
+	// TODO: update the image for the item if a new image file was provided
 	if itemData.KeyExists("name") {
 		item.Name = itemData.Get("name")
 	}
@@ -187,9 +186,6 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	}
 	if itemData.KeyExists("price") {
 		item.Price = itemData.GetFloat("price")
-	}
-	if itemData.KeyExists("imageUrl") {
-		item.ImageUrl = itemData.Get("imageUrl")
 	}
 	if err := zoom.Save(item); err != nil {
 		panic(err)
