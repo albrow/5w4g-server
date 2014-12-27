@@ -66,7 +66,7 @@ func TestAdminUsersShow(t *testing.T) {
 	res.AssertBodyContains(fmt.Sprintf(`"id": "%s"`, admin.Id))
 }
 
-func TestAdminIndex(t *testing.T) {
+func TestAdminUsersIndex(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// Get a valid token
@@ -86,7 +86,7 @@ func TestAdminIndex(t *testing.T) {
 	res.AssertBodyContains(`"email": "admin@5w4g.com"`)
 }
 
-func TestAdminDelete(t *testing.T) {
+func TestAdminUsersDelete(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// Get a valid token
