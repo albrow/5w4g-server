@@ -30,7 +30,6 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 	// Validations
 	val := itemData.Validator()
 	val.Require("name")
-	val.Require("imageUrl")
 	val.Require("price")
 	val.Greater("price", 0.0)
 	val.Require("description")
@@ -44,6 +43,16 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 			val.AddError("name", "that item name is already taken.")
 		}
 	}
+
+	// We'll check for the image file separately since go-data-parser doesn't support
+	// this yet.
+	_, _, err = req.FormFile("image")
+	if err != nil {
+		if err == http.ErrMissingFile {
+			val.AddError("image", "image is required.")
+		}
+	}
+
 	if val.HasErrors() {
 		errors := map[string]interface{}{
 			"errors": val.ErrorMap(),
@@ -54,8 +63,9 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 
 	// Create model and save to database
 	item := &models.Item{
-		Name:        itemData.Get("name"),
-		ImageUrl:    itemData.Get("imageUrl"),
+		Name: itemData.Get("name"),
+		// TODO: upload the actual file to S3 and set the actual url for the image file
+		ImageUrl:    "http://lorempixel.com/800/600/cats/",
 		Price:       itemData.GetFloat("price"),
 		Description: itemData.Get("description"),
 	}
