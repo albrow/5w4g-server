@@ -370,7 +370,7 @@ Body Parameters:
 | name\*           | The name of the item. Must be unique. |
 | description\*    | The description for the item. Should be a sentence or two. |
 | price\*          | The price of the item in dollars (decimal points allowed). |
-| imageUrl\*       | The url of the image for the item (e.g. hosted on dropbox or s3/cloudfront). |
+| image\*          | An image file which will be used as the image for this item.  |
 
 Response:
 
