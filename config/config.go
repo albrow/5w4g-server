@@ -29,12 +29,18 @@ type config struct {
 	AllowOrigins   []string
 	PrivateKeyFile string
 	Db             dbConfig
+	Aws            awsConfig
 }
 
 type dbConfig struct {
 	Address  string
 	Network  string
 	Database int
+}
+
+type awsConfig struct {
+	AccessKeyId     string
+	SecretAccessKey string
 }
 
 var Prod config = config{
@@ -47,6 +53,10 @@ var Prod config = config{
 		Address:  "", // TODO: Set to our redis server domain
 		Network:  "tcp",
 		Database: 0,
+	},
+	Aws: awsConfig{
+		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
+		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
 	},
 }
 
@@ -61,6 +71,10 @@ var Dev config = config{
 		Network:  "tcp",
 		Database: 11,
 	},
+	Aws: awsConfig{
+		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
+		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
+	},
 }
 
 var Test config = config{
@@ -74,9 +88,14 @@ var Test config = config{
 		Network:  "tcp",
 		Database: 12,
 	},
+	Aws: awsConfig{
+		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
+		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
+	},
 }
 
 func Init() {
+	requireEnvVariables("SWAG_AWS_ACCESS_KEY_ID", "SWAG_AWS_SECRET_ACCESS_KEY")
 	if Env == "development" || Env == "" {
 		Env = "development"
 		Use(Dev)
@@ -96,6 +115,14 @@ func readPrivateKey() {
 		panic(err)
 	} else {
 		PrivateKey = key
+	}
+}
+
+func requireEnvVariables(keys ...string) {
+	for _, key := range keys {
+		if os.Getenv(key) == "" {
+			panic("Missing required environment variable: " + key)
+		}
 	}
 }
 
