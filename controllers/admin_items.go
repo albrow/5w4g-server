@@ -1,13 +1,21 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/albrow/5w4g-server/config"
 	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
 	"github.com/gorilla/mux"
+	"github.com/mitchellh/goamz/aws"
+	"github.com/mitchellh/goamz/s3"
 	"github.com/unrolled/render"
+	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path/filepath"
+	"strings"
 )
 
 type AdminItemsController struct{}
@@ -46,7 +54,7 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 
 	// We'll check for the image file separately since go-data-parser doesn't support
 	// this yet.
-	_, _, err = req.FormFile("image")
+	imageFile, imageHeader, err := req.FormFile("image")
 	if err != nil {
 		if err == http.ErrMissingFile {
 			val.AddError("image", "image is required.")
@@ -61,11 +69,54 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	// Upload the image file to Amazon S3
+	// First, authenticate with AWS
+	auth, err := aws.GetAuth(config.Aws.AccessKeyId, config.Aws.SecretAccessKey)
+	if err != nil {
+		panic(err)
+	}
+	client := s3.New(auth, aws.USEast)
+	// Get the bucket by name
+	bucket := client.Bucket("5w4g-images")
+	if err != nil {
+		panic(err)
+	}
+	// Get the raw bytes from the image file
+	imageBytes, err := ioutil.ReadAll(imageFile)
+	if err != nil {
+		panic(err)
+	}
+	// Get the mimetype of the image file
+	imageType, err := lib.GetImageMimeType(imageHeader.Filename)
+	if err != nil {
+		errors := map[string]interface{}{
+			"errors": map[string]string{
+				"image": err.Error(),
+			},
+		}
+		r.JSON(res, 422, errors)
+		return
+	}
+	// The name of the image file is the aws-compatible url-safe encoding of the item name
+	// This guarantees uniqueness of image names and makes it url safe
+	imageFilename := url.QueryEscape(itemData.Get("name"))
+	imageFilePath := fmt.Sprintf("items/%s%s", imageFilename, filepath.Ext(imageHeader.Filename))
+	// Push the image file to the bucket
+	if err := bucket.Put(imageFilePath, imageBytes, imageType, s3.PublicRead); err != nil {
+		panic(err)
+	}
+
+	// In the url you use to actually get the image file, Amazon replaces "+" with
+	// "%2B", so we'll do that too. WARNING: there may be other characters where this
+	// happens too. The bug occurs because there are some characters that go's url.QueryEscape
+	// that uses Amazon doesn't like even though they are technically safe for urls according to
+	// spec
+	imageUrl := "https://s3.amazonaws.com/5w4g-images/" + strings.Replace(imageFilePath, "+", "%2B", -1)
+
 	// Create model and save to database
 	item := &models.Item{
-		Name: itemData.Get("name"),
-		// TODO: upload the actual file to S3 and set the actual url for the image file
-		ImageUrl:    "http://lorempixel.com/800/600/cats/",
+		Name:        itemData.Get("name"),
+		ImageUrl:    imageUrl,
 		Price:       itemData.GetFloat("price"),
 		Description: itemData.Get("description"),
 	}
