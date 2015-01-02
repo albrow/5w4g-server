@@ -17,7 +17,7 @@ func TestAdminUsersCreate(t *testing.T) {
 		panic(err)
 	}
 
-	// Created an authenticated request
+	// Create an authenticated request
 	req := rec.NewRequestWithData("POST", "/admin_users", map[string]string{
 		"email":           "test@example.com",
 		"password":        "password",
