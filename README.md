@@ -21,6 +21,15 @@ Prerequisites
 Getting Up and Running
 ----------------------
 
+### Add the necessary environment variables
+
+As of now, 5w4g-server requires the following environment variables
+
+| Key                           | Description     |
+| ----------------------------- | --------------- |
+| `SWAG_AWS_ACCESS_KEY_ID`      | Your aws access key id (public key). Used for image uploads. |
+| `SWAG_AWS_SECRET_ACCESS_KEY`  | Your aws secret access key (private key). Used for image uploads. |
+
 ### Just run the server
 
 If you would like to simply run the server in dev mode and don't intend to make any changes,
