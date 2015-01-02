@@ -18,7 +18,7 @@ func TestAdminUsersCreate(t *testing.T) {
 	}
 
 	// Created an authenticated request
-	req := rec.NewRequestWithData("POST", "/admin/users", map[string]string{
+	req := rec.NewRequestWithData("POST", "/admin_users", map[string]string{
 		"email":           "test@example.com",
 		"password":        "password",
 		"confirmPassword": "password",
@@ -55,7 +55,7 @@ func TestAdminUsersShow(t *testing.T) {
 	}
 
 	// Create an authenticated request
-	req := rec.NewRequest("GET", "/admin/users/"+admin.Id)
+	req := rec.NewRequest("GET", "/admin_users/"+admin.Id)
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	// Send the request and check the response
@@ -76,7 +76,7 @@ func TestAdminUsersIndex(t *testing.T) {
 	}
 
 	// Create an authenticated request
-	req := rec.NewRequest("GET", "/admin/users")
+	req := rec.NewRequest("GET", "/admin_users")
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	// Send the request and check the response
@@ -96,7 +96,7 @@ func TestAdminUsersDelete(t *testing.T) {
 	}
 
 	// Create a new admin user (which we will then delete)
-	createReq := rec.NewRequestWithData("POST", "/admin/users", map[string]string{
+	createReq := rec.NewRequestWithData("POST", "/admin_users", map[string]string{
 		"email":           "delete@me.com",
 		"password":        "password",
 		"confirmPassword": "password",
@@ -112,7 +112,7 @@ func TestAdminUsersDelete(t *testing.T) {
 	}
 
 	// Create an authenticated request to delete the admin user
-	deleteReq := rec.NewRequest("DELETE", "/admin/users/"+admin.Id)
+	deleteReq := rec.NewRequest("DELETE", "/admin_users/"+admin.Id)
 	deleteReq.Header.Add("Authorization", "Bearer "+token)
 
 	// Send the request and check the response

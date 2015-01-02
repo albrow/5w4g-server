@@ -18,9 +18,9 @@ import (
 	"strings"
 )
 
-type AdminItemsController struct{}
+type ItemsController struct{}
 
-func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request) {
+func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
@@ -131,7 +131,7 @@ func (c AdminItemsController) Create(res http.ResponseWriter, req *http.Request)
 	r.JSON(res, 200, jsonData)
 }
 
-func (c AdminItemsController) Show(res http.ResponseWriter, req *http.Request) {
+func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
@@ -159,7 +159,7 @@ func (c AdminItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	r.JSON(res, 200, jsonData)
 }
 
-func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request) {
+func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
@@ -247,7 +247,7 @@ func (c AdminItemsController) Update(res http.ResponseWriter, req *http.Request)
 	r.JSON(res, 200, jsonData)
 }
 
-func (c AdminItemsController) Delete(res http.ResponseWriter, req *http.Request) {
+func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in
@@ -273,7 +273,7 @@ func (c AdminItemsController) Delete(res http.ResponseWriter, req *http.Request)
 	r.JSON(res, 200, struct{}{})
 }
 
-func (c AdminItemsController) Index(res http.ResponseWriter, req *http.Request) {
+func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
 	// Make sure we're signed in

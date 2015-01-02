@@ -167,7 +167,7 @@ you restart the server.
 REST Endpoints
 --------------
 
-#### POST /admin/sign_in
+#### POST `/admin_users/sign_in`
 Purpose: Sign in an admin user (i.e. get a fresh, valid token)
 
 URL Parameters: none
@@ -211,7 +211,7 @@ Example Responses:
 }
 ```
 
-#### POST /admin/users
+#### POST `/admin_users`
 **Requires Admin Authentication**
 
 Purpose: Create a new admin user
@@ -259,7 +259,7 @@ Example Responses:
 }
 ```
 
-#### GET /admin/users/:id
+#### GET `/admin_users/:id`
 **Requires Admin Authentication**
 
 Purpose: Get an existing admin user
@@ -289,7 +289,7 @@ Example Responses:
 }
 ```
 
-#### GET /admin/users
+#### GET `/admin_users`
 **Requires Admin Authentication**
 
 Purpose: List all existing admin users
@@ -327,7 +327,7 @@ Example Responses:
 }
 ```
 
-#### DELETE /admin/users/:id
+#### DELETE `/admin_users/:id`
 **Requires Admin Authentication**
 
 Purpose: Delete an existing admin user
@@ -364,7 +364,7 @@ Example Responses:
 }
 ```
 
-#### POST /admin/items
+#### POST `/items`
 **Requires Admin Authentication**
 
 Purpose: Create a new item
@@ -421,7 +421,7 @@ Example Responses:
 }
 ```
 
-#### GET /admin/items/:id
+#### GET `/items/:id`
 **Requires Admin Authentication**
 
 Purpose: Get a single existing items
@@ -467,7 +467,7 @@ Example Responses:
 }
 ```
 
-#### GET /admin/items
+#### GET `/items`
 **Requires Admin Authentication**
 
 Purpose: List all existing items
@@ -508,7 +508,7 @@ Example Responses:
 ```
 
 
-#### DELETE /admin/items/:id
+#### DELETE `/items/:id`
 **Requires Admin Authentication**
 
 Purpose: Delete an existing item
@@ -545,7 +545,7 @@ Example Responses:
 }
 ```
 
-#### PUT /admin/items/:id
+#### PUT `/items/:id`
 **Requires Admin Authentication**
 
 Purpose: Update an existing item

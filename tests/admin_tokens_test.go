@@ -15,7 +15,7 @@ func TestAdminTokensCreate(t *testing.T) {
 	}
 
 	// First sign in with a valid email and password
-	res := rec.Post("/admin/sign_in", map[string]string{
+	res := rec.Post("/admin_users/sign_in", map[string]string{
 		"email": admin.Email,
 		// we have no choice but to assume the default admin password
 		"password": "password",
@@ -54,7 +54,7 @@ func TestAdminTokensCreate(t *testing.T) {
 	}
 
 	for _, testInput := range testInputs {
-		res := rec.Post("/admin/sign_in", map[string]string{
+		res := rec.Post("/admin_users/sign_in", map[string]string{
 			"email":    testInput.email,
 			"password": testInput.password,
 		})

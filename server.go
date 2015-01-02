@@ -43,20 +43,19 @@ func main() {
 
 	// Define routes
 	router := mux.NewRouter()
-	adminRouter := router.PathPrefix("/admin").Subrouter()
 	adminTokens := controllers.AdminTokensController{}
-	adminRouter.HandleFunc("/sign_in", adminTokens.Create).Methods("POST")
+	router.HandleFunc("/admin_users/sign_in", adminTokens.Create).Methods("POST")
 	adminUsers := controllers.AdminUsersController{}
-	adminRouter.HandleFunc("/users", adminUsers.Create).Methods("POST")
-	adminRouter.HandleFunc("/users/{id}", adminUsers.Show).Methods("GET")
-	adminRouter.HandleFunc("/users", adminUsers.Index).Methods("GET")
-	adminRouter.HandleFunc("/users/{id}", adminUsers.Delete).Methods("DELETE")
-	adminItems := controllers.AdminItemsController{}
-	adminRouter.HandleFunc("/items", adminItems.Create).Methods("POST")
-	adminRouter.HandleFunc("/items", adminItems.Index).Methods("GET")
-	adminRouter.HandleFunc("/items/{id}", adminItems.Show).Methods("GET")
-	adminRouter.HandleFunc("/items/{id}", adminItems.Update).Methods("PUT")
-	adminRouter.HandleFunc("/items/{id}", adminItems.Delete).Methods("DELETE")
+	router.HandleFunc("/admin_users", adminUsers.Create).Methods("POST")
+	router.HandleFunc("/admin_users/{id}", adminUsers.Show).Methods("GET")
+	router.HandleFunc("/admin_users", adminUsers.Index).Methods("GET")
+	router.HandleFunc("/admin_users/{id}", adminUsers.Delete).Methods("DELETE")
+	items := controllers.ItemsController{}
+	router.HandleFunc("/items", items.Create).Methods("POST")
+	router.HandleFunc("/items", items.Index).Methods("GET")
+	router.HandleFunc("/items/{id}", items.Show).Methods("GET")
+	router.HandleFunc("/items/{id}", items.Update).Methods("PUT")
+	router.HandleFunc("/items/{id}", items.Delete).Methods("DELETE")
 	n.UseHandler(router)
 
 	// Run
