@@ -423,7 +423,7 @@ Example Responses:
 
 #### GET `/items/:id`
 
-Purpose: Get a single existing items
+Purpose: Get a single existing item
 
 URL Parameters:
 
@@ -620,11 +620,11 @@ An example would be a non-admin user trying to create or remove items.
 
 **422: Unprocessable Entity**  
 The paramaters for the request were either incorrect or improperly formatted.
-You should check the errors field to find out what went wrong and display the
-error(s) to the user.
+This is the response code for validation errors, and will typically include information
+about which form fields were invalid. You should display the error(s) to the user.
 
 **500: Internal Server Error**  
-An error occured on the server-server side. Will always return an errors field
+An error occured on the server-side. Will always return an errors field
 in the JSON response which contains details about the error. If the runtime environment
 is set to production, all internal server errors will simply contain the text: "Sorry
 there was a problem." for security reasons.
