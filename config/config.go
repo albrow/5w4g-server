@@ -17,9 +17,10 @@ var (
 	Host           string
 	Port           string
 	AllowOrigins   []string
-	Db             dbConfig
 	PrivateKey     []byte
 	PrivateKeyFile string
+	Aws            awsConfig
+	Db             dbConfig
 )
 
 type config struct {
@@ -133,4 +134,5 @@ func Use(c config) {
 	AllowOrigins = c.AllowOrigins
 	PrivateKeyFile = c.PrivateKeyFile
 	Db = c.Db
+	Aws = c.Aws
 }
