@@ -408,8 +408,8 @@ Example Responses:
 ```json
 {
     "errors": {
-        "imageUrl": [
-            "imageUrl is required."
+        "image": [
+            "image is required."
         ],
         "name": [
             "that item name is already taken."
@@ -422,7 +422,6 @@ Example Responses:
 ```
 
 #### GET `/items/:id`
-**Requires Admin Authentication**
 
 Purpose: Get a single existing items
 
@@ -468,7 +467,6 @@ Example Responses:
 ```
 
 #### GET `/items`
-**Requires Admin Authentication**
 
 Purpose: List all existing items
 
@@ -591,8 +589,8 @@ Example Responses:
 ```json
 {
     "errors": {
-        "imageUrl": [
-            "imageUrl is required."
+        "image": [
+            "image is required."
         ],
         "name": [
             "that item name is already taken."

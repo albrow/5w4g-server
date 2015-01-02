@@ -134,12 +134,6 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Get the id from the url
 	vars := mux.Vars(req)
 	id, found := vars["id"]
@@ -275,12 +269,6 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 
 func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
-
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
 
 	// Find all admin users in the database
 	var items []*models.Item
