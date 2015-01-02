@@ -164,6 +164,97 @@ running in the test environment. When running in the test environment, the datab
 you restart the server.
 
 
+Response Formats
+----------------
+
+The server will always respond with json. In general, there are no wrappers around root object. A successful
+response will be the object you requested or created, or an array of objects in the case of a get request.
+
+### Successful Requests
+Successful requests will always return a 200 code. The body of the response is a json object. Here's an example
+of a successful request when creating an item:
+```json
+{
+    "name": "Ice Cube Sticker",
+    "imageUrl": "http://placehold.it/350x350",
+    "price": 3,
+    "description": "This sticker is really cool. Ice cold, actually.",
+    "id": "k4FbclRdLYXVfELnndelad"
+}
+```
+
+Here's an example of a successful sign in request. In this case, there is only one field:
+
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiVGFXY25NOXIyN1h4OVpnQm5kZGJjMiIsImV4cCI6MTQyMTY5ODQyMSwiaWF0IjoxNDE5MTA2NDIxfQ.0_GtGwP3XGwcFIYnF2EcKNUbl3bRKRgYvWCCF89uxes"
+}
+```
+
+For successful DELETE requests, the response will just be an empty object:
+
+```json
+{}
+```
+
+Finally, here's an example of getting all existing items (GET /items), which returns an array of objects instead
+of a single object:
+
+```json
+[
+    {
+        "name": "Sticker Sticker",
+        "imageUrl": "http://placehold.it/350x350",
+        "price": 42,
+        "description": "Yo dawg, I herd you like stickers, so I put a sticker on your sticker so you can stick a sticker sticker to your stickers. ",
+        "id": "2MxIL1sHBvXZKUMDndelnw"
+    },
+    {
+        "name": "Ice Cube Sticker",
+        "imageUrl": "http://placehold.it/350x350",
+        "price": 3,
+        "description": "This sticker is really cool. Ice cold, actually.",
+        "id": "k4FbclRdLYXVfELnndelad"
+    }
+]
+```
+
+### Validation Errors
+If there are any server-side validation errors, the server will respond with a 422 code. Validation errors only occur
+when there is a problem with a form. The body of the response will be a map of field name to the errors associated with
+that field.  Here's an example:
+
+```json
+{
+    "email": [
+        "email is required.",
+        "email must be correctly formatted."
+    ],
+    "password": [
+        "password is required."
+    ]
+}
+```
+
+Note that there can be more than one error associated with a particular field.
+
+### General Errors
+All other errors will return with a different response code (see the "Response Codes" section below). The body of the response
+will be a single key, "error", and it's value will be a string describing the error that occurred. Here are two examples:
+
+```json
+{
+    "error": "dial tcp 127.0.0.1:6379: connection refused"
+}
+```
+
+```json
+{
+    "error": "You need to be signed in to do that!"
+}
+```
+
+
 REST Endpoints
 --------------
 
@@ -180,36 +271,6 @@ Body Parameters:
 | email\*          | The admin user's email address. Must be properly formatted. |
 | password\*       | The admin user's password. |
 
-Response:
-
-| Field           | Type      | Description     |
-| --------------- | --------- | --------------- |
-| token           | string    | A JSON Web Token which can be used for authentication of future requests. |
-| errors          | object    | The errors that occured (if any). |
-
-
-
-Example Responses:
-
-```json
-{
-"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoiVGFXY25NOXIyN1h4OVpnQm5kZGJjMiIsImV4cCI6MTQyMTY5ODQyMSwiaWF0IjoxNDE5MTA2NDIxfQ.0_GtGwP3XGwcFIYnF2EcKNUbl3bRKRgYvWCCF89uxes"
-}
-```
-
-```json
-{
-    "errors": {
-        "email": [
-            "email is required.",
-            "email must be correctly formatted."
-        ],
-        "password": [
-            "password is required."
-        ]
-    }
-}
-```
 
 #### POST `/admin_users`
 **Requires Admin Authentication**
@@ -227,38 +288,6 @@ Body Parameters:
 | password\*        | The admin user's password. Must be at least 8 characters long. |
 | confirmPassword\* | The admin user's password again. Must match password. |
 
-Response:
-
-| Field            | Type      | Description     |
-| ---------------- | --------- | --------------- |
-| admin            | object    | The admin user. Contains fields such as email and id. |
-| errors           | object     | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "admin": {
-        "email": "new@example.com",
-        "id": "DnlK3zdiqsv6Hwzdnddajl"
-    }
-}
-```
-
-```json
-{
-    "errors": {
-        "email": [
-            "that email address is already taken."
-        ],
-        "password": [
-            "password must be at least 8 characters long."
-        ]
-    }
-}
-```
-
 #### GET `/admin_users/:id`
 **Requires Admin Authentication**
 
@@ -272,23 +301,6 @@ URL Parameters:
 
 Body Parameters: none
 
-Response:
-
-| Field             | Type      | Description     |
-| ----------------- | --------- | --------------- |
-| admin             | object    | The admin with the given id. |
-| errors            | object    | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "email": "admin@5w4g.com",
-    "id": "TaWcnM9r27Xx9ZgBnddbc2"
-}
-```
-
 #### GET `/admin_users`
 **Requires Admin Authentication**
 
@@ -297,35 +309,6 @@ Purpose: List all existing admin users
 URL Parameters: none
 
 Body Parameters: none
-
-Response:
-
-| Field             | Type      | Description     |
-| ----------------- | --------- | --------------- |
-| admins            | array     | A javascript array of admin users. Each contains fields such as email and id. |
-| errors            | object     | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "admins": [
-        {
-            "email": "admin@5w4g.com",
-            "id": "2AmRlXcIDvmc8tXVndd09p"
-        },
-        {
-            "email": "a@b.c",
-            "id": "DnlK3zdiqsv6Hwzdnddajl"
-        },
-        {
-            "email": "new@example.com",
-            "id": "OQyxUYZU2Cd2pgRFnddabo"
-        }
-    ]
-}
-```
 
 #### DELETE `/admin_users/:id`
 **Requires Admin Authentication**
@@ -339,30 +322,6 @@ URL Parameters:
 | id\*          | The id of the admin user you want to delete |
 
 Body Parameters: none
-
-Response:
-
-| Field             | Type      | Description     |
-| ----------------- | --------- | --------------- |
-| errors            | object    | The errors that occured (if any). |
-
-Note: if the request was successful, the response will simply be an empty JSON object.
-
-Example Responses:
-
-```json
-{}
-```
-
-```json
-{
-    "errors": {
-        "error": [
-            "You can't delete yourself, bro!"
-        ]
-    }
-}
-```
 
 #### POST `/items`
 **Requires Admin Authentication**
@@ -381,46 +340,6 @@ Body Parameters:
 | price\*          | The price of the item in dollars (decimal points allowed). |
 | image\*          | An image file which will be used as the image for this item.  |
 
-Response:
-
-| Field            | Type      | Description     |
-| ---------------- | --------- | --------------- |
-| item             | object    | The item object. |
-| errors           | object    | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "item": [
-        {
-            "name": "Ice Cube Sticker",
-            "imageUrl": "http://placehold.it/350x350",
-            "price": 3,
-            "description": "This sticker is really cool. Ice cold, actually.",
-            "id": "k4FbclRdLYXVfELnndelad"
-        }
-    ]
-}
-```
-
-```json
-{
-    "errors": {
-        "image": [
-            "image is required."
-        ],
-        "name": [
-            "that item name is already taken."
-        ],
-        "price": [
-            "price must be greater than 0.000000."
-        ]
-    }
-}
-```
-
 #### GET `/items/:id`
 
 Purpose: Get a single existing item
@@ -433,39 +352,6 @@ URL Parameters:
 
 Body Parameters: none
 
-Response:
-
-| Field             | Type      | Description      |
-| ----------------- | --------- | ---------------- |
-| item              | object    | The item object. |
-| errors            | object    | The errors that occured (if any). |
-
-Note: if the request was successful, the response will simply be an empty JSON object.
-
-Example Responses:
-
-```json
-{
-    "item": {
-        "name": "Nothing",
-        "imageUrl": "http://placehold.it/350x350",
-        "price": 10000000000000000,
-        "description": "Pay us money for nothing. There is no sticker and no item of any kind.",
-        "id": "9RlIVFnDQ5IHCwUpndemxm"
-    }
-}
-```
-
-```json
-{
-    "errors": {
-        "error": [
-           "dial tcp 127.0.0.1:6379: connection refused"
-        ]
-    }
-}
-```
-
 #### GET `/items`
 
 Purpose: List all existing items
@@ -473,38 +359,6 @@ Purpose: List all existing items
 URL Parameters: none
 
 Body Parameters: none
-
-Response:
-
-| Field      | Type      | Description     |
-| ---------- | --------- | --------------- |
-| items      | array     | A javascript array of items. |
-| errors     | object    | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "items": [
-        {
-            "name": "Sticker Sticker",
-            "imageUrl": "http://placehold.it/350x350",
-            "price": 42,
-            "description": "Yo dawg, I herd you like stickers, so I put a sticker on your sticker so you can stick a sticker sticker to your stickers. ",
-            "id": "2MxIL1sHBvXZKUMDndelnw"
-        },
-        {
-            "name": "Ice Cube Sticker",
-            "imageUrl": "http://placehold.it/350x350",
-            "price": 3,
-            "description": "This sticker is really cool. Ice cold, actually.",
-            "id": "k4FbclRdLYXVfELnndelad"
-        }
-    ]
-}
-```
-
 
 #### DELETE `/items/:id`
 **Requires Admin Authentication**
@@ -518,30 +372,6 @@ URL Parameters:
 | id\*          | The id of the item you want to delete |
 
 Body Parameters: none
-
-Response:
-
-| Field             | Type      | Description     |
-| ----------------- | --------- | --------------- |
-| errors            | object    | The errors that occured (if any). |
-
-Note: if the request was successful, the response will simply be an empty JSON object.
-
-Example Responses:
-
-```json
-{}
-```
-
-```json
-{
-    "errors": {
-        "error": [
-           "dial tcp 127.0.0.1:6379: connection refused"
-        ]
-    }
-}
-```
 
 #### PUT `/items/:id`
 **Requires Admin Authentication**
@@ -564,43 +394,6 @@ Body Parameters:
 | price         | The price of the item in dollars (decimal points allowed). |
 | image         | An image file which will be used as the image for this item. |
 
-Response:
-
-| Field            | Type      | Description     |
-| ---------------- | --------- | --------------- |
-| item             | object    | The item object. |
-| errors           | object    | The errors that occured (if any). |
-
-
-Example Responses:
-
-```json
-{
-    "item": {
-        "name": "This name was updated",
-        "imageUrl": "http://placehold.it/350x350",
-        "price": 9000,
-        "description": "This description was also just updated",
-        "id": "k4FbclRdLYXVfELnndelad"
-    }
-}
-```
-
-```json
-{
-    "errors": {
-        "image": [
-            "image is required."
-        ],
-        "name": [
-            "that item name is already taken."
-        ],
-        "price": [
-            "price must be greater than 0.000000."
-        ]
-    }
-}
-```
 
 Error Codes
 -----------
