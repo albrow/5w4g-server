@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 	"github.com/unrolled/render"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -58,63 +59,32 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		if err == http.ErrMissingFile {
 			val.AddError("image", "image is required.")
+		} else {
+			// There was some other error reading the image file
+			panic(err)
+		}
+	} else {
+		// Only check mimteype if image was included in the first place
+		if _, err := lib.GetImageMimeType(imageHeader.Filename); err != nil {
+			val.AddError("image", err.Error())
 		}
 	}
-
 	if val.HasErrors() {
 		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 
-	// Upload the image file to Amazon S3
-	// First, authenticate with AWS
-	auth, err := aws.GetAuth(config.Aws.AccessKeyId, config.Aws.SecretAccessKey)
-	if err != nil {
-		panic(err)
-	}
-	client := s3.New(auth, aws.USEast)
-	// Get the bucket by name
-	bucket := client.Bucket(config.Aws.BucketName)
-	if err != nil {
-		panic(err)
-	}
-	// Get the raw bytes from the image file
-	imageBytes, err := ioutil.ReadAll(imageFile)
-	if err != nil {
-		panic(err)
-	}
-	// Get the mimetype of the image file
-	imageType, err := lib.GetImageMimeType(imageHeader.Filename)
-	if err != nil {
-		val.AddError("image", err.Error())
-		r.JSON(res, 422, val.ErrorMap())
-		return
-	}
-	// The name of the image file is the aws-compatible url-safe encoding of the item name
-	// This guarantees uniqueness of image names and makes it url safe
-	imageFilename := url.QueryEscape(itemData.Get("name"))
-	imageFilePath := fmt.Sprintf("items/%s%s", imageFilename, filepath.Ext(imageHeader.Filename))
-	// Push the image file to the bucket
-	if err := bucket.Put(imageFilePath, imageBytes, imageType, s3.PublicRead); err != nil {
-		panic(err)
-	}
-
-	// In the url you use to actually get the image file, Amazon replaces "+" with
-	// "%2B", so we'll do that too. WARNING: there may be other characters where this
-	// happens too. The bug occurs because there are some characters that go's url.QueryEscape
-	// that uses Amazon doesn't like even though they are technically safe for urls according to
-	// spec
-	imageUrl := fmt.Sprintf("https://s3.amazonaws.com/%s/%s",
-		config.Aws.BucketName,
-		strings.Replace(imageFilePath, "+", "%2B", -1))
-
-	// Create model and save to database
+	// Create model with the attributes we have so far
 	item := &models.Item{
 		Name:        itemData.Get("name"),
-		ImageUrl:    imageUrl,
 		Price:       itemData.GetFloat("price"),
 		Description: itemData.Get("description"),
 	}
+
+	// Upload the image to S3
+	uploadImage(imageFile, imageHeader.Filename, item)
+
+	// Save the item to the database
 	if err := zoom.Save(item); err != nil {
 		panic(err)
 	}
@@ -189,7 +159,26 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
-	// TODO: check for a valid image file
+	// We'll check for the image file separately since go-data-parser doesn't support
+	// this yet.
+	imageFile, imageHeader, err := req.FormFile("image")
+	imageProvided := imageHeader.Filename != ""
+	if err != nil {
+		if err == http.ErrMissingFile {
+			// This is fine since image is not required for updating
+		} else {
+			// There was some other error reading the image file
+			panic(err)
+		}
+	}
+	if imageProvided {
+		// Only check mimetype if an image file was provided in the first place
+		if _, err := lib.GetImageMimeType(imageHeader.Filename); err != nil {
+			val.AddError("image", err.Error())
+		}
+	}
+
+	// Render validation errors if any
 	if val.HasErrors() {
 		r.JSON(res, 422, val.ErrorMap())
 		return
@@ -202,7 +191,6 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Update the item
-	// TODO: update the image for the item if a new image file was provided
 	if itemData.KeyExists("name") {
 		item.Name = itemData.Get("name")
 	}
@@ -211,6 +199,9 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 	if itemData.KeyExists("price") {
 		item.Price = itemData.GetFloat("price")
+	}
+	if imageProvided {
+		uploadImage(imageFile, imageHeader.Filename, item)
 	}
 	if err := zoom.Save(item); err != nil {
 		panic(err)
@@ -253,4 +244,55 @@ func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 
 	// Render response
 	r.JSON(res, 200, items)
+}
+
+func calculateImageOrigPath(itemName, filename string) string {
+	imageFilename := url.QueryEscape(itemName)
+	return fmt.Sprintf("items/%s%s", imageFilename, filepath.Ext(filename))
+}
+
+func calculateImageUrl(itemName, filename string) string {
+	orig := calculateImageOrigPath(itemName, filename)
+
+	// In the url you use to actually get the image file, Amazon replaces "+" with
+	// "%2B", so we'll do that too. WARNING: there may be other characters where this
+	// happens too. The bug occurs because there are some characters that go's url.QueryEscape
+	// that uses Amazon doesn't like even though they are technically safe for urls according to
+	// spec
+	return fmt.Sprintf("https://s3.amazonaws.com/%s/%s",
+		config.Aws.BucketName,
+		strings.Replace(orig, "+", "%2B", -1))
+}
+
+func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
+	// Upload the image file to Amazon S3
+	// First, authenticate with AWS
+	auth, err := aws.GetAuth(config.Aws.AccessKeyId, config.Aws.SecretAccessKey)
+	if err != nil {
+		panic(err)
+	}
+	client := s3.New(auth, aws.USEast)
+	// Get the bucket by name
+	bucket := client.Bucket(config.Aws.BucketName)
+	if err != nil {
+		panic(err)
+	}
+	// Get the raw bytes from the image file
+	imageBytes, err := ioutil.ReadAll(imageFile)
+	if err != nil {
+		panic(err)
+	}
+	// Get the mimetype of the image file
+	imageType, _ := lib.GetImageMimeType(filename)
+
+	// Calculate and set original image path
+	item.ImageOrigPath = calculateImageOrigPath(item.Name, filename)
+
+	// Push the image file to the bucket
+	if err := bucket.Put(item.ImageOrigPath, imageBytes, imageType, s3.PublicRead); err != nil {
+		panic(err)
+	}
+
+	// Calculate and set image url
+	item.ImageUrl = calculateImageUrl(item.Name, filename)
 }
