@@ -74,7 +74,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 	client := s3.New(auth, aws.USEast)
 	// Get the bucket by name
-	bucket := client.Bucket("5w4g-images")
+	bucket := client.Bucket(config.Aws.BucketName)
 	if err != nil {
 		panic(err)
 	}
@@ -104,7 +104,9 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	// happens too. The bug occurs because there are some characters that go's url.QueryEscape
 	// that uses Amazon doesn't like even though they are technically safe for urls according to
 	// spec
-	imageUrl := "https://s3.amazonaws.com/5w4g-images/" + strings.Replace(imageFilePath, "+", "%2B", -1)
+	imageUrl := fmt.Sprintf("https://s3.amazonaws.com/%s/%s",
+		config.Aws.BucketName,
+		strings.Replace(imageFilePath, "+", "%2B", -1))
 
 	// Create model and save to database
 	item := &models.Item{

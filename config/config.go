@@ -42,6 +42,7 @@ type dbConfig struct {
 type awsConfig struct {
 	AccessKeyId     string
 	SecretAccessKey string
+	BucketName      string
 }
 
 var Prod config = config{
@@ -58,6 +59,7 @@ var Prod config = config{
 	Aws: awsConfig{
 		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
 		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
+		BucketName:      "5w4g-images",
 	},
 }
 
@@ -75,6 +77,7 @@ var Dev config = config{
 	Aws: awsConfig{
 		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
 		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
+		BucketName:      "5w4g-images-dev",
 	},
 }
 
@@ -92,6 +95,7 @@ var Test config = config{
 	Aws: awsConfig{
 		AccessKeyId:     os.Getenv("SWAG_AWS_ACCESS_KEY_ID"),
 		SecretAccessKey: os.Getenv("SWAG_AWS_SECRET_ACCESS_KEY"),
+		BucketName:      "5w4g-images-test",
 	},
 }
 
