@@ -48,10 +48,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 		}
 	}
 	if val.HasErrors() {
-		errors := map[string]interface{}{
-			"errors": val.ErrorMap(),
-		}
-		r.JSON(res, 422, errors)
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 
@@ -71,10 +68,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Render response
-	jsonData := map[string]interface{}{
-		"admin": admin,
-	}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, admin)
 }
 
 func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
@@ -128,8 +122,7 @@ func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) 
 	}
 
 	// Render response
-	dataMap := map[string]interface{}{"admins": admins}
-	r.JSON(res, 200, dataMap)
+	r.JSON(res, 200, admins)
 }
 
 func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request) {

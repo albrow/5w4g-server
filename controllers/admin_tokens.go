@@ -29,10 +29,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	val.MatchEmail("email")
 	val.Require("password")
 	if val.HasErrors() {
-		errors := map[string]interface{}{
-			"errors": val.ErrorMap(),
-		}
-		r.JSON(res, 422, errors)
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 
@@ -42,10 +39,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 		if _, ok := err.(*zoom.ModelNotFoundError); ok {
 			// This means a model with that email address was not found
 			val.AddError("email", "email or password was incorrect.")
-			errors := map[string]interface{}{
-				"errors": val.ErrorMap(),
-			}
-			r.JSON(res, 422, errors)
+			r.JSON(res, 422, val.ErrorMap())
 			return
 		} else {
 			// This means there was an error connecting to the database
@@ -56,10 +50,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	// Check if the found admin's password matches the submitted password
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.HashedPassword), adminData.GetBytes("password")); err != nil {
 		val.AddError("email", "email or password was incorrect.")
-		errors := map[string]interface{}{
-			"errors": val.ErrorMap(),
-		}
-		r.JSON(res, 422, errors)
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 

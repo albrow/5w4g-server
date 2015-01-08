@@ -5,10 +5,8 @@ var (
 	ErrForbidden    = NewJsonError("You do not have permission to do that!")
 )
 
-func NewJsonError(msg string) map[string]interface{} {
-	return map[string]interface{}{
-		"errors": map[string][]string{
-			"error": []string{msg},
-		},
+func NewJsonError(msg string) map[string]string {
+	return map[string]string{
+		"error": msg,
 	}
 }

@@ -28,7 +28,6 @@ func TestAdminUsersCreate(t *testing.T) {
 	// Send the request and check the response
 	res := rec.Do(req)
 	res.AssertOk()
-	res.AssertBodyContains("admin")
 	res.AssertBodyContains(`"email": "test@example.com"`)
 
 	// Make sure the user was actually created
@@ -61,7 +60,6 @@ func TestAdminUsersShow(t *testing.T) {
 	// Send the request and check the response
 	res := rec.Do(req)
 	res.AssertOk()
-	res.AssertBodyContains("admin")
 	res.AssertBodyContains(`"email": "admin@5w4g.com"`)
 	res.AssertBodyContains(fmt.Sprintf(`"id": "%s"`, admin.Id))
 }
@@ -82,7 +80,6 @@ func TestAdminUsersIndex(t *testing.T) {
 	// Send the request and check the response
 	res := rec.Do(req)
 	res.AssertOk()
-	res.AssertBodyContains("admins")
 	res.AssertBodyContains(`"email": "admin@5w4g.com"`)
 }
 

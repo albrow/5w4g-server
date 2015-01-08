@@ -36,7 +36,6 @@ func TestAdminTokensCreate(t *testing.T) {
 			email:    admin.Email,
 			password: "not_the_real_password",
 			expectedContains: []string{
-				"error",
 				"email or password was incorrect",
 			},
 			expectedCode: 422,
@@ -46,7 +45,6 @@ func TestAdminTokensCreate(t *testing.T) {
 			email:    "not_the_real_email@foo.com",
 			password: "password",
 			expectedContains: []string{
-				"error",
 				"email or password was incorrect",
 			},
 			expectedCode: 422,

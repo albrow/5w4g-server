@@ -62,10 +62,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if val.HasErrors() {
-		errors := map[string]interface{}{
-			"errors": val.ErrorMap(),
-		}
-		r.JSON(res, 422, errors)
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 
@@ -89,12 +86,8 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	// Get the mimetype of the image file
 	imageType, err := lib.GetImageMimeType(imageHeader.Filename)
 	if err != nil {
-		errors := map[string]interface{}{
-			"errors": map[string]string{
-				"image": err.Error(),
-			},
-		}
-		r.JSON(res, 422, errors)
+		val.AddError("image", err.Error())
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 	// The name of the image file is the aws-compatible url-safe encoding of the item name
@@ -125,10 +118,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	jsonData := map[string]interface{}{
-		"item": item,
-	}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, item)
 }
 
 func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
@@ -149,8 +139,7 @@ func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// render response
-	jsonData := map[string]interface{}{"item": item}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, item)
 }
 
 func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
@@ -208,10 +197,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 	// TODO: check for a valid image file
 	if val.HasErrors() {
-		errors := map[string]interface{}{
-			"errors": val.ErrorMap(),
-		}
-		r.JSON(res, 422, errors)
+		r.JSON(res, 422, val.ErrorMap())
 		return
 	}
 
@@ -237,8 +223,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	jsonData := map[string]interface{}{"item": item}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, item)
 }
 
 func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
@@ -277,6 +262,5 @@ func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	jsonData := map[string]interface{}{"items": items}
-	r.JSON(res, 200, jsonData)
+	r.JSON(res, 200, items)
 }
