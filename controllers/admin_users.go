@@ -82,11 +82,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 
 	// Get the id from the url
 	vars := mux.Vars(req)
-	id, found := vars["id"]
-	if !found {
-		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
-		return
-	}
+	id := vars["id"]
 
 	// Get the admin user from the database
 	admin := &models.AdminUser{}
@@ -94,7 +90,10 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 		if _, ok := err.(*zoom.KeyNotFoundError); ok {
 			// This means an admin user with the given id was not found
 			msg := fmt.Sprintf("Could not find admin user with id = %s", id)
-			r.JSON(res, 422, lib.NewJsonError(msg))
+			jsonErr := map[string][]string{
+				"id": []string{msg},
+			}
+			r.JSON(res, 422, jsonErr)
 			return
 		} else {
 			// This means there was some other error
@@ -137,15 +136,15 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 
 	// Get the id from the url
 	vars := mux.Vars(req)
-	id, found := vars["id"]
-	if !found {
-		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
-		return
-	}
+	id := vars["id"]
 
 	// Sanity check. (You can't delete yourself)
 	if currentUser.Id == id {
-		r.JSON(res, 422, lib.NewJsonError("You can't delete yourself, dummy!"))
+		// This means an admin user with the given id was not found
+		jsonErr := map[string][]string{
+			"id": []string{"You can't delete yourself, dummy!"},
+		}
+		r.JSON(res, 422, jsonErr)
 		return
 	}
 

@@ -126,11 +126,7 @@ func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 
 	// Get the id from the url
 	vars := mux.Vars(req)
-	id, found := vars["id"]
-	if !found {
-		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
-		return
-	}
+	id := vars["id"]
 
 	// Find item in the database
 	item := &models.Item{}
@@ -153,11 +149,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 
 	// Get the id from the url
 	vars := mux.Vars(req)
-	id, found := vars["id"]
-	if !found {
-		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
-		return
-	}
+	id := vars["id"]
 
 	// Parse data from request
 	itemData, err := data.Parse(req)
@@ -237,11 +229,7 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 
 	// Get the id from the url
 	vars := mux.Vars(req)
-	id, found := vars["id"]
-	if !found {
-		r.JSON(res, 422, lib.NewJsonError("Missing required url parameter: id"))
-		return
-	}
+	id := vars["id"]
 
 	// Delete from database
 	if err := zoom.DeleteById("Item", id); err != nil {
