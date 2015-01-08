@@ -8,7 +8,6 @@ import (
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
 	"github.com/gorilla/mux"
-	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 	"github.com/unrolled/render"
 	"io"
@@ -224,8 +223,17 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 
+	// Get the item from the database
+	item := &models.Item{}
+	if err := zoom.ScanById(id, item); err != nil {
+		panic(err)
+	}
+
+	// Delete the image from S3
+	deleteImage(item.ImageOrigPath)
+
 	// Delete from database
-	if err := zoom.DeleteById("Item", id); err != nil {
+	if err := zoom.Delete(item); err != nil {
 		panic(err)
 	}
 
@@ -265,18 +273,6 @@ func calculateImageUrl(itemName, filename string) string {
 }
 
 func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
-	// Upload the image file to Amazon S3
-	// First, authenticate with AWS
-	auth, err := aws.GetAuth(config.Aws.AccessKeyId, config.Aws.SecretAccessKey)
-	if err != nil {
-		panic(err)
-	}
-	client := s3.New(auth, aws.USEast)
-	// Get the bucket by name
-	bucket := client.Bucket(config.Aws.BucketName)
-	if err != nil {
-		panic(err)
-	}
 	// Get the raw bytes from the image file
 	imageBytes, err := ioutil.ReadAll(imageFile)
 	if err != nil {
@@ -288,6 +284,12 @@ func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
 	// Calculate and set original image path
 	item.ImageOrigPath = calculateImageOrigPath(item.Name, filename)
 
+	// Get the bucket instance
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		panic(err)
+	}
+
 	// Push the image file to the bucket
 	if err := bucket.Put(item.ImageOrigPath, imageBytes, imageType, s3.PublicRead); err != nil {
 		panic(err)
@@ -295,4 +297,17 @@ func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
 
 	// Calculate and set image url
 	item.ImageUrl = calculateImageUrl(item.Name, filename)
+}
+
+func deleteImage(path string) {
+	// Get the bucket instance
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		panic(err)
+	}
+
+	// Delete the file from the bucket
+	if err := bucket.Del(path); err != nil {
+		panic(err)
+	}
 }
