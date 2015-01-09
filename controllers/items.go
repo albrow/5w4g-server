@@ -81,7 +81,9 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Upload the image to S3
-	uploadImage(imageFile, imageHeader.Filename, item)
+	if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+		panic(err)
+	}
 
 	// Save the item to the database
 	if err := zoom.Save(item); err != nil {
@@ -161,7 +163,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	// We'll check for the image file separately since go-data-parser doesn't support
 	// this yet.
 	imageFile, imageHeader, err := req.FormFile("image")
-	imageProvided := imageHeader.Filename != ""
+	imageProvided := imageHeader != nil
 	if err != nil {
 		if err == http.ErrMissingFile {
 			// This is fine since image is not required for updating
@@ -199,8 +201,32 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	if itemData.KeyExists("price") {
 		item.Price = itemData.GetFloat("price")
 	}
-	if imageProvided {
-		uploadImage(imageFile, imageHeader.Filename, item)
+
+	// Handle different image upload cases
+	switch {
+	case imageProvided && !itemData.KeyExists("name"):
+		// New image provided, name of the image file should stay the same
+		if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+			panic(err)
+		}
+	case imageProvided && itemData.KeyExists("name"):
+		// We should delete the old image (which uses the old name)
+		// and then upload the new one using the new item name
+		if err := deleteImage(item.ImageOrigPath); err != nil {
+			panic(err)
+		}
+		if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+			panic(err)
+		}
+	case !imageProvided && itemData.KeyExists("name"):
+		// We should rename the existing (old) image file since the
+		// item name has been changed
+		newPath, newUrl, err := renameImage(item.ImageOrigPath, item.Name)
+		if err != nil {
+			panic(err)
+		}
+		item.ImageOrigPath = newPath
+		item.ImageUrl = newUrl
 	}
 	if err := zoom.Save(item); err != nil {
 		panic(err)
@@ -272,11 +298,13 @@ func calculateImageUrl(itemName, filename string) string {
 		strings.Replace(orig, "+", "%2B", -1))
 }
 
-func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
+// uploadImage uploads an image file to amazon S3. NOTE: It also mutates item
+// by setting its ImageUrl and ImageOrigPath properties.
+func uploadImage(imageFile io.Reader, filename string, item *models.Item) error {
 	// Get the raw bytes from the image file
 	imageBytes, err := ioutil.ReadAll(imageFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	// Get the mimetype of the image file
 	imageType, _ := lib.GetImageMimeType(filename)
@@ -287,27 +315,49 @@ func uploadImage(imageFile io.Reader, filename string, item *models.Item) {
 	// Get the bucket instance
 	bucket, err := lib.S3Bucket()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Push the image file to the bucket
 	if err := bucket.Put(item.ImageOrigPath, imageBytes, imageType, s3.PublicRead); err != nil {
-		panic(err)
+		return err
 	}
 
 	// Calculate and set image url
 	item.ImageUrl = calculateImageUrl(item.Name, filename)
+	return nil
 }
 
-func deleteImage(path string) {
+func deleteImage(path string) error {
 	// Get the bucket instance
 	bucket, err := lib.S3Bucket()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	// Delete the file from the bucket
 	if err := bucket.Del(path); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
+}
+
+func renameImage(oldPath string, newName string) (newPath string, newUrl string, e error) {
+	// Get bucket
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		return "", "", err
+	}
+	oldUrl, err := url.Parse(oldPath)
+	oldFilename := filepath.Base(oldUrl.Path)
+	newPath = calculateImageOrigPath(newName, oldFilename)
+	newUrl = calculateImageUrl(newName, oldFilename)
+
+	// As far as I know the only way to do this with goamz is to
+	// copy and then delete
+	if err := bucket.Copy(oldPath, newPath, s3.PublicRead); err != nil {
+		return "", "", err
+	}
+	deleteImage(oldPath)
+	return newPath, newUrl, nil
 }
