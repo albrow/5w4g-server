@@ -358,6 +358,8 @@ func renameImage(oldPath string, newName string) (newPath string, newUrl string,
 	if err := bucket.Copy(oldPath, newPath, s3.PublicRead); err != nil {
 		return "", "", err
 	}
-	deleteImage(oldPath)
+	if err := deleteImage(oldPath); err != nil {
+		return "", "", err
+	}
 	return newPath, newUrl, nil
 }
