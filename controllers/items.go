@@ -81,8 +81,11 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Upload the image to S3
-	if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+	if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
 		panic(err)
+	} else {
+		item.ImageOrigPath = imagePath
+		item.ImageUrl = imageUrl
 	}
 
 	// Save the item to the database
@@ -206,8 +209,11 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	switch {
 	case imageProvided && !itemData.KeyExists("name"):
 		// New image provided, name of the image file should stay the same
-		if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+		if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
 			panic(err)
+		} else {
+			item.ImageOrigPath = imagePath
+			item.ImageUrl = imageUrl
 		}
 	case imageProvided && itemData.KeyExists("name"):
 		// We should delete the old image (which uses the old name)
@@ -215,8 +221,11 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 		if err := deleteImage(item.ImageOrigPath); err != nil {
 			panic(err)
 		}
-		if err := uploadImage(imageFile, imageHeader.Filename, item); err != nil {
+		if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
 			panic(err)
+		} else {
+			item.ImageOrigPath = imagePath
+			item.ImageUrl = imageUrl
 		}
 	case !imageProvided && itemData.KeyExists("name"):
 		// We should rename the existing (old) image file since the
@@ -298,34 +307,32 @@ func calculateImageUrl(itemName, filename string) string {
 		strings.Replace(orig, "+", "%2B", -1))
 }
 
-// uploadImage uploads an image file to amazon S3. NOTE: It also mutates item
-// by setting its ImageUrl and ImageOrigPath properties.
-func uploadImage(imageFile io.Reader, filename string, item *models.Item) error {
+func uploadImage(imageFile io.Reader, filename string, itemName string) (imageOrigPath string, imageUrl string, e error) {
 	// Get the raw bytes from the image file
 	imageBytes, err := ioutil.ReadAll(imageFile)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	// Get the mimetype of the image file
 	imageType, _ := lib.GetImageMimeType(filename)
 
 	// Calculate and set original image path
-	item.ImageOrigPath = calculateImageOrigPath(item.Name, filename)
+	imageOrigPath = calculateImageOrigPath(itemName, filename)
 
 	// Get the bucket instance
 	bucket, err := lib.S3Bucket()
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	// Push the image file to the bucket
-	if err := bucket.Put(item.ImageOrigPath, imageBytes, imageType, s3.PublicRead); err != nil {
-		return err
+	if err := bucket.Put(imageOrigPath, imageBytes, imageType, s3.PublicRead); err != nil {
+		return "", "", err
 	}
 
 	// Calculate and set image url
-	item.ImageUrl = calculateImageUrl(item.Name, filename)
-	return nil
+	imageUrl = calculateImageUrl(itemName, filename)
+	return imageOrigPath, imageUrl, nil
 }
 
 func deleteImage(path string) error {
