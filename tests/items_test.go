@@ -81,10 +81,33 @@ func TestItemsCreate(t *testing.T) {
 	res.AssertBodyContains(`"price": 99.99`)
 
 	// Make sure the item was actually created
-	if count, err := zoom.NewQuery("Item").Filter("Name =", "Test Item Create").Count(); err != nil {
+	item := &models.Item{}
+	if err := zoom.NewQuery("Item").Filter("Name =", "Test Item Create").ScanOne(item); err != nil {
+		if _, ok := err.(*zoom.ModelNotFoundError); ok {
+			t.Error("Item not created.")
+		} else {
+			panic(err)
+		}
+	}
+
+	// Make sure image was actually created on s3
+	bucket, err := lib.S3Bucket()
+	if err != nil {
 		panic(err)
-	} else if count != 1 {
-		t.Errorf(`Expected 1 item with name = "Test Item" to exist, but found %d items with that name.`, count)
+	}
+	// Get the image key from the bucket
+	_, err = bucket.GetKey(item.ImageOrigPath)
+	if err != nil {
+		// Check for an s3 error
+		if s3Error, ok := err.(*s3.Error); !ok {
+			panic(err)
+		} else {
+			if s3Error.StatusCode == 404 {
+				t.Error("File was not created on s3.")
+			} else {
+				panic(err)
+			}
+		}
 	}
 
 	// TODO: test server-side validations
