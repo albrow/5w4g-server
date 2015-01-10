@@ -30,9 +30,7 @@ func main() {
 	recovery.StackDepth = 3
 	recovery.Formatter = func(errMsg string, stack []byte, file string, line int, fullMessages bool) interface{} {
 		result := map[string]interface{}{
-			"errors": map[string][]string{
-				"error": []string{errMsg},
-			},
+			"error": errMsg,
 		}
 		if fullMessages {
 			result["lineNumber"] = fmt.Sprintf("%s:%d", file, line)
