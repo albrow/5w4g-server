@@ -2,9 +2,11 @@ package tests
 
 import (
 	"bytes"
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/fipple"
 	"github.com/albrow/zoom"
+	"github.com/mitchellh/goamz/s3"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -121,4 +123,25 @@ func TestItemsDelete(t *testing.T) {
 		t.Error("Item was not deleted.")
 	}
 
+	// Make sure image was actually deleted from s3
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		panic(err)
+	}
+	// Get the image key from the bucket
+	_, err = bucket.GetKey(item.ImageOrigPath)
+	if err != nil {
+		// Check for an s3 error
+		if s3Error, ok := err.(*s3.Error); !ok {
+			panic(err)
+		} else {
+			if s3Error.StatusCode != 404 {
+				// If the status code is 404 then the image is gone,
+				// which is what we expect, if not, then there is a problem
+				panic(err)
+			}
+		}
+	} else {
+		t.Error("File was not deleted from s3.")
+	}
 }
