@@ -14,58 +14,6 @@ import (
 	"testing"
 )
 
-func createItemRequest(name string, description string, price string) *http.Request {
-
-	// Get a valid token
-	token, err := getAdminTestToken()
-	if err != nil {
-		panic(err)
-	}
-
-	// First, create a new multipart form writer. We need to use multipart/form-data
-	// since we are including a file.
-	body := bytes.NewBuffer([]byte{})
-	form := multipart.NewWriter(body)
-	// Add the simple key-value params to the form
-	itemData := map[string]string{
-		"name":        name,
-		"description": description,
-		"price":       price,
-	}
-	for fieldname, value := range itemData {
-		if err := form.WriteField(fieldname, value); err != nil {
-			panic(err)
-		}
-	}
-	// Add the file to the form
-	fileWriter, err := form.CreateFormFile("image", "clear.gif")
-	if err != nil {
-		panic(err)
-	}
-	// Copy the data from a test image file into the form
-	testImagePath := os.Getenv("GOPATH") + "/src/github.com/albrow/5w4g-server/test_data/images/clear.gif"
-	testImageFile, err := os.Open(testImagePath)
-	if err != nil {
-		panic(err)
-	}
-	if _, err := io.Copy(fileWriter, testImageFile); err != nil {
-		panic(err)
-	}
-	// Close the form to finish writing
-	if err := form.Close(); err != nil {
-		panic(err)
-	}
-	// Create the request object and add the needed headers
-	req, err := http.NewRequest("POST", testUrl+"/items", body)
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "multipart/form-data; boundary="+form.Boundary())
-
-	return req
-}
-
 func TestItemsCreate(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
@@ -167,4 +115,56 @@ func TestItemsDelete(t *testing.T) {
 	} else {
 		t.Error("File was not deleted from s3.")
 	}
+}
+
+func createItemRequest(name string, description string, price string) *http.Request {
+
+	// Get a valid token
+	token, err := getAdminTestToken()
+	if err != nil {
+		panic(err)
+	}
+
+	// First, create a new multipart form writer. We need to use multipart/form-data
+	// since we are including a file.
+	body := bytes.NewBuffer([]byte{})
+	form := multipart.NewWriter(body)
+	// Add the simple key-value params to the form
+	itemData := map[string]string{
+		"name":        name,
+		"description": description,
+		"price":       price,
+	}
+	for fieldname, value := range itemData {
+		if err := form.WriteField(fieldname, value); err != nil {
+			panic(err)
+		}
+	}
+	// Add the file to the form
+	fileWriter, err := form.CreateFormFile("image", "clear.gif")
+	if err != nil {
+		panic(err)
+	}
+	// Copy the data from a test image file into the form
+	testImagePath := os.Getenv("GOPATH") + "/src/github.com/albrow/5w4g-server/test_data/images/clear.gif"
+	testImageFile, err := os.Open(testImagePath)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := io.Copy(fileWriter, testImageFile); err != nil {
+		panic(err)
+	}
+	// Close the form to finish writing
+	if err := form.Close(); err != nil {
+		panic(err)
+	}
+	// Create the request object and add the needed headers
+	req, err := http.NewRequest("POST", testUrl+"/items", body)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "multipart/form-data; boundary="+form.Boundary())
+
+	return req
 }
