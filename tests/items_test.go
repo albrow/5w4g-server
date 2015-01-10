@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/fipple"
@@ -61,22 +62,49 @@ func TestItemsCreate(t *testing.T) {
 	// TODO: test server-side validations
 }
 
+func TestItemsShow(t *testing.T) {
+	rec := fipple.NewRecorder(t, testUrl)
+
+	// First create a test item
+	createReq := createItemRequest("Test Item Show", "An item for testing show functionality.", "0.01")
+	rec.Do(createReq)
+
+	// Get the item we created from the database
+	item := &models.Item{}
+	q := zoom.NewQuery("Item").Filter("Name =", "Test Item Show")
+	if err := q.ScanOne(item); err != nil {
+		panic(err)
+	}
+
+	// Then do a request to show it
+	// NOTE: this doesn't require auth
+	res := rec.Get("/items/" + item.Id)
+	res.AssertOk()
+	res.AssertBodyContains(`"name": "Test Item Show"`)
+	res.AssertBodyContains(`"description": "An item for testing show functionality."`)
+	res.AssertBodyContains(`"price": 0.01`)
+}
+
+func TestItemsUpdate(t *testing.T) {
+	// TODO: fill this in
+	t.Skip("Skipping update test")
+}
+
 func TestItemsDelete(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
-	// Create a new authenticated request.
+	// First create a test item
 	createReq := createItemRequest("Test Item Delete", "An item for testing purposes", "99.99")
-
-	// Send the request
 	rec.Do(createReq)
 
+	// Get the item we created from the database
 	item := &models.Item{}
 	if err := zoom.NewQuery("Item").Filter("Name =", "Test Item Delete").ScanOne(item); err != nil {
 		panic(err)
 	}
-	deleteReq := rec.NewRequest("DELETE", "/items/"+item.Id)
 
-	// Get a valid token and add it to the request
+	// Create a new authenticated request for deleting the item
+	deleteReq := rec.NewRequest("DELETE", "/items/"+item.Id)
 	token, err := getAdminTestToken()
 	if err != nil {
 		panic(err)
@@ -114,6 +142,42 @@ func TestItemsDelete(t *testing.T) {
 		}
 	} else {
 		t.Error("File was not deleted from s3.")
+	}
+}
+
+func TestItemsIndex(t *testing.T) {
+	rec := fipple.NewRecorder(t, testUrl)
+
+	// First create two test items
+	indexDescription := "This item should show up in the index."
+	createReqs := []*http.Request{
+		createItemRequest("Test Item Index 0", indexDescription, "99.99"),
+		createItemRequest("Test Item Index 1", indexDescription, "99.99"),
+	}
+	for _, req := range createReqs {
+		rec.Do(req)
+	}
+
+	// Get all the existing items from the database
+	allItems := []*models.Item{}
+	if err := zoom.NewQuery("Item").Scan(&allItems); err != nil {
+		panic(err)
+	}
+	if len(allItems) < 2 {
+		t.Errorf("Expected at least two items to be created, but got %d", len(allItems))
+	}
+
+	// Send a new index request
+	// NOTE: this doesn't require authentication
+	res := rec.Get("/items")
+	res.AssertOk()
+
+	// Make sure all the items we expect are there
+	for _, item := range allItems {
+		res.AssertBodyContains(item.Name)
+		res.AssertBodyContains(item.Description)
+		res.AssertBodyContains(fmt.Sprintf("%2.2f", item.Price))
+		res.AssertBodyContains(item.ImageUrl)
 	}
 }
 
