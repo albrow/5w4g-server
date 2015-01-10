@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mitchellh/goamz/s3"
 	"github.com/unrolled/render"
-	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -19,6 +19,8 @@ import (
 )
 
 type ItemsController struct{}
+
+var acceptedImageExts = []string{"gif", "svg"}
 
 func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
@@ -41,6 +43,8 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	val.Require("price")
 	val.Greater("price", 0.0)
 	val.Require("description")
+	val.RequireFile("image")
+	val.AcceptFileExts("image", acceptedImageExts...)
 	if itemData.Get("name") != "" {
 		// Validate that name is unique
 		count, err := zoom.NewQuery("Item").Filter("Name =", itemData.Get("name")).Count()
@@ -49,23 +53,6 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 		}
 		if count != 0 {
 			val.AddError("name", "that item name is already taken.")
-		}
-	}
-
-	// We'll check for the image file separately since go-data-parser doesn't support
-	// this yet.
-	imageFile, imageHeader, err := req.FormFile("image")
-	if err != nil {
-		if err == http.ErrMissingFile {
-			val.AddError("image", "image is required.")
-		} else {
-			// There was some other error reading the image file
-			panic(err)
-		}
-	} else {
-		// Only check mimteype if image was included in the first place
-		if _, err := lib.GetImageMimeType(imageHeader.Filename); err != nil {
-			val.AddError("image", err.Error())
 		}
 	}
 	if val.HasErrors() {
@@ -81,7 +68,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Upload the image to S3
-	if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
+	if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 		panic(err)
 	} else {
 		item.ImageOrigPath = imagePath
@@ -163,23 +150,9 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}
-	// We'll check for the image file separately since go-data-parser doesn't support
-	// this yet.
-	imageFile, imageHeader, err := req.FormFile("image")
-	imageProvided := imageHeader != nil
-	if err != nil {
-		if err == http.ErrMissingFile {
-			// This is fine since image is not required for updating
-		} else {
-			// There was some other error reading the image file
-			panic(err)
-		}
-	}
-	if imageProvided {
-		// Only check mimetype if an image file was provided in the first place
-		if _, err := lib.GetImageMimeType(imageHeader.Filename); err != nil {
-			val.AddError("image", err.Error())
-		}
+	if itemData.KeyExists("image") {
+		val.RequireFile("image") // Makes sure the file is not empty
+		val.AcceptFileExts("image", acceptedImageExts...)
 	}
 
 	// Render validation errors if any
@@ -207,27 +180,27 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 
 	// Handle different image upload cases
 	switch {
-	case imageProvided && !itemData.KeyExists("name"):
+	case itemData.KeyExists("image") && !itemData.KeyExists("name"):
 		// New image provided, name of the image file should stay the same
-		if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
+		if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 			panic(err)
 		} else {
 			item.ImageOrigPath = imagePath
 			item.ImageUrl = imageUrl
 		}
-	case imageProvided && itemData.KeyExists("name"):
+	case itemData.KeyExists("image") && itemData.KeyExists("name"):
 		// We should delete the old image (which uses the old name)
 		// and then upload the new one using the new item name
 		if err := deleteImage(item.ImageOrigPath); err != nil {
 			panic(err)
 		}
-		if imagePath, imageUrl, err := uploadImage(imageFile, imageHeader.Filename, item.Name); err != nil {
+		if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 			panic(err)
 		} else {
 			item.ImageOrigPath = imagePath
 			item.ImageUrl = imageUrl
 		}
-	case !imageProvided && itemData.KeyExists("name"):
+	case !itemData.KeyExists("image") && itemData.KeyExists("name"):
 		// We should rename the existing (old) image file since the
 		// item name has been changed
 		newPath, newUrl, err := renameImage(item.ImageOrigPath, item.Name)
@@ -307,17 +280,23 @@ func calculateImageUrl(itemName, filename string) string {
 		strings.Replace(orig, "+", "%2B", -1))
 }
 
-func uploadImage(imageFile io.Reader, filename string, itemName string) (imageOrigPath string, imageUrl string, e error) {
+func uploadImage(fileHeader *multipart.FileHeader, itemName string) (imageOrigPath string, imageUrl string, e error) {
+	// Get the image file from the header
+	imageFile, err := fileHeader.Open()
+	if err != nil {
+		return "", "", err
+	}
+
 	// Get the raw bytes from the image file
 	imageBytes, err := ioutil.ReadAll(imageFile)
 	if err != nil {
 		return "", "", err
 	}
 	// Get the mimetype of the image file
-	imageType, _ := lib.GetImageMimeType(filename)
+	imageType, _ := lib.GetImageMimeType(fileHeader.Filename)
 
 	// Calculate and set original image path
-	imageOrigPath = calculateImageOrigPath(itemName, filename)
+	imageOrigPath = calculateImageOrigPath(itemName, fileHeader.Filename)
 
 	// Get the bucket instance
 	bucket, err := lib.S3Bucket()
@@ -331,7 +310,7 @@ func uploadImage(imageFile io.Reader, filename string, itemName string) (imageOr
 	}
 
 	// Calculate and set image url
-	imageUrl = calculateImageUrl(itemName, filename)
+	imageUrl = calculateImageUrl(itemName, fileHeader.Filename)
 	return imageOrigPath, imageUrl, nil
 }
 
