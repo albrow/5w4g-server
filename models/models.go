@@ -52,11 +52,9 @@ func (i *Identifier) SetId(id string) {
 }
 
 func CreateDefaultAdminUser() error {
-	admins := []*AdminUser{}
-	if err := zoom.NewQuery("AdminUser").Scan(&admins); err != nil {
+	if num, err := zoom.NewQuery("AdminUser").Count(); err != nil {
 		return err
-	}
-	if len(admins) == 0 {
+	} else if num == 0 {
 		// No admins exist, so we should create one with a default email and password
 		hash, err := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
 		if err != nil {
