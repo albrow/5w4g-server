@@ -57,7 +57,12 @@ func TestItemsCreate(t *testing.T) {
 		}
 	}
 
-	// TODO: test server-side validations
+	// Attempting to create a second item with the same name should fail
+	req = createItemRequest(rec, "Test Item Create", "An item for testing purposes", "99.99")
+	res = rec.Do(req)
+	res.AssertCode(422)
+	res.AssertBodyContains(`"name"`)
+	res.AssertBodyContains("already taken")
 }
 
 func TestItemsShow(t *testing.T) {
