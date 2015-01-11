@@ -1,17 +1,15 @@
 package tests
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/fipple"
 	"github.com/albrow/zoom"
 	"github.com/mitchellh/goamz/s3"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -19,7 +17,7 @@ func TestItemsCreate(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// Create a new authenticated request.
-	req := createItemRequest("Test Item Create", "An item for testing purposes", "99.99")
+	req := createItemRequest(rec, "Test Item Create", "An item for testing purposes", "99.99")
 
 	// Send the request and check the response
 	res := rec.Do(req)
@@ -66,7 +64,7 @@ func TestItemsShow(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// First create a test item
-	createReq := createItemRequest("Test Item Show", "An item for testing show functionality.", "0.01")
+	createReq := createItemRequest(rec, "Test Item Show", "An item for testing show functionality.", "0.01")
 	rec.Do(createReq)
 
 	// Get the item we created from the database
@@ -94,7 +92,7 @@ func TestItemsDelete(t *testing.T) {
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// First create a test item
-	createReq := createItemRequest("Test Item Delete", "An item for testing purposes", "99.99")
+	createReq := createItemRequest(rec, "Test Item Delete", "An item for testing purposes", "99.99")
 	rec.Do(createReq)
 
 	// Get the item we created from the database
@@ -151,8 +149,8 @@ func TestItemsIndex(t *testing.T) {
 	// First create two test items
 	indexDescription := "This item should show up in the index."
 	createReqs := []*http.Request{
-		createItemRequest("Test Item Index 0", indexDescription, "99.99"),
-		createItemRequest("Test Item Index 1", indexDescription, "99.99"),
+		createItemRequest(rec, "Test Item Index 0", indexDescription, "99.99"),
+		createItemRequest(rec, "Test Item Index 1", indexDescription, "99.99"),
 	}
 	for _, req := range createReqs {
 		rec.Do(req)
@@ -181,54 +179,33 @@ func TestItemsIndex(t *testing.T) {
 	}
 }
 
-func createItemRequest(name string, description string, price string) *http.Request {
-
-	// Get a valid token
-	token, err := getAdminTestToken()
-	if err != nil {
-		panic(err)
-	}
-
-	// First, create a new multipart form writer. We need to use multipart/form-data
-	// since we are including a file.
-	body := bytes.NewBuffer([]byte{})
-	form := multipart.NewWriter(body)
-	// Add the simple key-value params to the form
-	itemData := map[string]string{
+func createItemRequest(rec *fipple.Recorder, name string, description string, price string) *http.Request {
+	// Set up the simple key-value params to the form
+	fields := map[string]string{
 		"name":        name,
 		"description": description,
 		"price":       price,
 	}
-	for fieldname, value := range itemData {
-		if err := form.WriteField(fieldname, value); err != nil {
-			panic(err)
-		}
-	}
-	// Add the file to the form
-	fileWriter, err := form.CreateFormFile("image", "clear.gif")
-	if err != nil {
-		panic(err)
-	}
-	// Copy the data from a test image file into the form
+
+	// Set up the files that will be written to the form
 	testImagePath := os.Getenv("GOPATH") + "/src/github.com/albrow/5w4g-server/test_data/images/clear.gif"
 	testImageFile, err := os.Open(testImagePath)
 	if err != nil {
 		panic(err)
 	}
-	if _, err := io.Copy(fileWriter, testImageFile); err != nil {
-		panic(err)
+	files := map[string]*fipple.File{
+		"image": &fipple.File{
+			Name:    filepath.Base(testImagePath),
+			Content: testImageFile,
+		},
 	}
-	// Close the form to finish writing
-	if err := form.Close(); err != nil {
-		panic(err)
-	}
-	// Create the request object and add the needed headers
-	req, err := http.NewRequest("POST", testUrl+"/items", body)
+
+	// Create the request, add token, and return it
+	req := rec.NewMultipartRequest("POST", "/items", fields, files)
+	token, err := getAdminTestToken()
 	if err != nil {
 		panic(err)
 	}
 	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "multipart/form-data; boundary="+form.Boundary())
-
 	return req
 }
