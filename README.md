@@ -411,6 +411,11 @@ should be redirected to the sign in page.
 The user is trying to send a request which he/she is not authorized to send.
 An example would be a non-admin user trying to create or remove items.
 
+**418: I am a Teapot**
+This error code is returned iff the server has unintentionally turned into (or
+perhaps gained control of) a teapot and you are attempting to brew coffee with it.
+You may not attempt to brew coffee using the server under these circumstances. 
+
 **422: Unprocessable Entity**  
 The paramaters for the request were either incorrect or improperly formatted.
 This is the response code for validation errors, and will typically include information
