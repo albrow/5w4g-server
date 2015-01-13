@@ -76,20 +76,8 @@ func TestItemsShow(t *testing.T) {
 	// First create a test item
 	showName := "Test Item Show"
 	showDesc := "An item for testing show functionality."
-	showPrice := "0.99"
-	createReq := createItemRequest(rec, map[string]string{
-		"name":        showName,
-		"description": showDesc,
-		"price":       showPrice,
-	}, blueImage)
-	rec.Do(createReq)
-
-	// Get the item we created from the database
-	item := &models.Item{}
-	q := zoom.NewQuery("Item").Filter("Name =", showName)
-	if err := q.ScanOne(item); err != nil {
-		panic(err)
-	}
+	showPrice := 0.99
+	item := createMockItem(showName, showDesc, showPrice)
 
 	// Then do a request to show it
 	// NOTE: this doesn't require auth
@@ -97,7 +85,7 @@ func TestItemsShow(t *testing.T) {
 	res.AssertOk()
 	res.AssertBodyContains(fmt.Sprintf(`"name": "%s"`, showName))
 	res.AssertBodyContains(fmt.Sprintf(`"description": "%s"`, showDesc))
-	res.AssertBodyContains(`"price": ` + showPrice)
+	res.AssertBodyContains(fmt.Sprintf(`"price": %1.2f`, showPrice))
 }
 
 func TestItemsUpdate(t *testing.T) {
@@ -313,29 +301,9 @@ func TestItemsIndex(t *testing.T) {
 
 	// First create two test items
 	indexDescription := "This item should show up in the index."
-	createReqs := []*http.Request{
-		createItemRequest(rec, map[string]string{
-			"name":        "Test Item Index 0",
-			"description": indexDescription,
-			"price":       "99.99",
-		}, blueImage),
-		createItemRequest(rec, map[string]string{
-			"name":        "Test Item Index 1",
-			"description": indexDescription,
-			"price":       "99.99",
-		}, blueImage),
-	}
-	for _, req := range createReqs {
-		rec.Do(req)
-	}
-
-	// Get all the existing items from the database
-	allItems := []*models.Item{}
-	if err := zoom.NewQuery("Item").Scan(&allItems); err != nil {
-		panic(err)
-	}
-	if len(allItems) < 2 {
-		t.Errorf("Expected at least two items to be created, but got %d", len(allItems))
+	allItems := []*models.Item{
+		createMockItem("Test Item Index 0", indexDescription, 99.01),
+		createMockItem("Test Item Index 1", indexDescription, 99.02),
 	}
 
 	// Send a new index request
@@ -375,6 +343,25 @@ func createItemRequest(rec *fipple.Recorder, fields map[string]string, imageFile
 	}
 	req.Header.Add("Authorization", "Bearer "+token)
 	return req
+}
+
+// createMockItem creates an item in the database using a mock (fake) ImageUrl property.
+// This function is useful for cases where we don't actually care about the s3 functionality. E.g.
+// when testing Show and Index. It panics if there was an error creating the item or connecting
+// to the database.
+func createMockItem(name, description string, price float64) *models.Item {
+	config.Init()
+	models.Init()
+	item := &models.Item{
+		Name:        name,
+		Description: description,
+		Price:       price,
+		ImageUrl:    "http://lorempixel.com/300/200/cats",
+	}
+	if err := zoom.Save(item); err != nil {
+		panic(err)
+	}
+	return item
 }
 
 // updateItemRequest creates and returns an http.Request with the given parameters, which

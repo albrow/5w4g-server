@@ -4,36 +4,41 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/albrow/5w4g-server/config"
 	"github.com/albrow/zoom"
+	"sync"
 )
 
+var once = sync.Once{}
+
 func Init() {
-	// Initialize zoom
-	zoom.Init(&zoom.Configuration{
-		Network:  config.Db.Network,
-		Address:  config.Db.Address,
-		Database: config.Db.Database,
+	once.Do(func() {
+		// Initialize zoom
+		zoom.Init(&zoom.Configuration{
+			Network:  config.Db.Network,
+			Address:  config.Db.Address,
+			Database: config.Db.Database,
+		})
+
+		// Register all models
+		models := []zoom.Model{&AdminUser{}, &Item{}}
+		for _, m := range models {
+			if err := zoom.Register(m); err != nil {
+				panic(err)
+			}
+		}
+
+		// If we're in test environment, flush the database on startup
+		if config.Env == "test" {
+			conn := zoom.GetConn()
+			if _, err := conn.Do("FLUSHDB"); err != nil {
+				panic(err)
+			}
+		}
+
+		// Create a default admin user if needed
+		if err := CreateDefaultAdminUser(); err != nil {
+			panic(err)
+		}
 	})
-
-	// Register all models
-	models := []zoom.Model{&AdminUser{}, &Item{}}
-	for _, m := range models {
-		if err := zoom.Register(m); err != nil {
-			panic(err)
-		}
-	}
-
-	// If we're in test environment, flush the database on startup
-	if config.Env == "test" {
-		conn := zoom.GetConn()
-		if _, err := conn.Do("FLUSHDB"); err != nil {
-			panic(err)
-		}
-	}
-
-	// Create a default admin user if needed
-	if err := CreateDefaultAdminUser(); err != nil {
-		panic(err)
-	}
 }
 
 // Identifier has an Id field and satisfies zoom.Model.

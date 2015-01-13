@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 )
 
 var (
@@ -99,20 +101,37 @@ var Test config = config{
 	},
 }
 
+var once = sync.Once{}
+
 func Init() {
-	requireEnvVariables("SWAG_AWS_ACCESS_KEY_ID", "SWAG_AWS_SECRET_ACCESS_KEY")
-	if Env == "development" || Env == "" {
-		Env = "development"
-		Use(Dev)
-	} else if Env == "test" {
-		Use(Test)
-	} else if Env == "production" {
-		Use(Prod)
-	} else {
-		panic("Unkown environment. Don't know what configuration to use!")
+	once.Do(func() {
+		detectTest()
+		requireEnvVariables("SWAG_AWS_ACCESS_KEY_ID", "SWAG_AWS_SECRET_ACCESS_KEY")
+		if Env == "development" || Env == "" {
+			Env = "development"
+			Use(Dev)
+		} else if Env == "test" {
+			Use(Test)
+		} else if Env == "production" {
+			Use(Prod)
+		} else {
+			panic("Unkown environment. Don't know what configuration to use!")
+		}
+		readPrivateKey()
+		fmt.Printf("[config] Running in %s environment...\n", Env)
+	})
+}
+
+// detectTest detects whether we are currently running tests
+// and if so sets config.Env appropriately.
+func detectTest() {
+	// if we are running tests, the temporary file go creates for us
+	// will end in ".test"
+	split := strings.Split(os.Args[0], ".")
+	extension := split[len(split)-1]
+	if extension == "test" {
+		Env = "test"
 	}
-	readPrivateKey()
-	fmt.Printf("[config] Running in %s environment...\n", Env)
 }
 
 func readPrivateKey() {
