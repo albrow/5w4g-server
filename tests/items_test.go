@@ -53,9 +53,12 @@ func TestItemsCreate(t *testing.T) {
 		}
 	}
 
-	// Make sure image was actually created on s3
+	// Make sure image was actually created on s3 and that its contents match what we expect
 	if !s3FileExists(item.ImageOrigPath) {
 		t.Error("File was not created on s3.")
+	}
+	if calculateHashForS3File(item.ImageOrigPath) != blueImageHash {
+		t.Error("The s3 file hash did not equal what we expected it to be (the blue image hash). Therefore, image file was not actually uploaded.")
 	}
 
 	// Attempting to create a second item with the same name should fail
