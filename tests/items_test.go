@@ -23,6 +23,7 @@ var (
 )
 
 func TestItemsCreate(t *testing.T) {
+	t.Parallel()
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// Create a new authenticated request.
@@ -92,6 +93,7 @@ func TestItemsShow(t *testing.T) {
 }
 
 func TestItemsUpdate(t *testing.T) {
+	t.Parallel()
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// First create a test item
@@ -255,6 +257,7 @@ func TestItemsUpdate(t *testing.T) {
 }
 
 func TestItemsDelete(t *testing.T) {
+	t.Parallel()
 	rec := fipple.NewRecorder(t, testUrl)
 
 	// First create a test item
