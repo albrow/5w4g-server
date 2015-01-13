@@ -168,7 +168,9 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Update the item
+	nameChanged := false
 	if itemData.KeyExists("name") {
+		nameChanged = item.Name != itemData.Get("name")
 		item.Name = itemData.Get("name")
 	}
 	if itemData.KeyExists("description") {
@@ -180,7 +182,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 
 	// Handle different image upload cases
 	switch {
-	case itemData.KeyExists("image") && !itemData.KeyExists("name"):
+	case itemData.KeyExists("image") && !nameChanged:
 		// New image provided, name of the image file should stay the same
 		if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 			panic(err)
@@ -188,7 +190,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 			item.ImageOrigPath = imagePath
 			item.ImageUrl = imageUrl
 		}
-	case itemData.KeyExists("image") && itemData.KeyExists("name"):
+	case itemData.KeyExists("image") && nameChanged:
 		// We should delete the old image (which uses the old name)
 		// and then upload the new one using the new item name
 		if err := deleteImage(item.ImageOrigPath); err != nil {
@@ -200,7 +202,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 			item.ImageOrigPath = imagePath
 			item.ImageUrl = imageUrl
 		}
-	case !itemData.KeyExists("image") && itemData.KeyExists("name"):
+	case !itemData.KeyExists("image") && nameChanged:
 		// We should rename the existing (old) image file since the
 		// item name has been changed
 		newPath, newUrl, err := renameImage(item.ImageOrigPath, item.Name)
