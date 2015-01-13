@@ -1,11 +1,17 @@
 package tests
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/OneOfOne/xxhash/native"
 	"github.com/albrow/5w4g-server/config"
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/zoom"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/mitchellh/goamz/s3"
+	"io"
+	"os"
 	"time"
 )
 
@@ -90,4 +96,58 @@ func getAdminTestUser() (*models.AdminUser, error) {
 	}
 	adminTestUser = admin
 	return admin, nil
+}
+
+// s3FileExists returns true iff there is a file on the s3 bucket designated
+// by path. It panics if there are any errors connecting to the bucket.
+func s3FileExists(path string) bool {
+	// Get the bucket
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		panic(err)
+	}
+	// Attmpt to get the key from the bucket
+	_, err = bucket.GetKey(path)
+	if err != nil {
+		// Check for an s3 error
+		if s3Error, ok := err.(*s3.Error); !ok {
+			panic(err)
+		} else {
+			if s3Error.StatusCode == 404 {
+				return false
+			} else {
+				panic(err)
+			}
+		}
+	}
+	return true
+}
+
+// calculateHashForFile calculates a hash for the file at the given path.
+// It panics if there were any errrors opening the file or calculating the hash.
+func calculateHashForFile(path string) string {
+	h := xxhash.New64()
+	f, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(h, f)
+	return string(h.Sum(nil))
+}
+
+// calculateHashForPath calculates a hash for the file stored on s3 designated
+// by path. It panics if there were any errrors communicated with s3, opening the file
+// or calculating the hash.
+func calculateHashForS3File(path string) string {
+	bucket, err := lib.S3Bucket()
+	if err != nil {
+		panic(err)
+	}
+	contents, err := bucket.Get(path)
+	if err != nil {
+		panic(err)
+	}
+	h := xxhash.New64()
+	io.Copy(h, bytes.NewBuffer(contents))
+	return string(h.Sum(nil))
 }
