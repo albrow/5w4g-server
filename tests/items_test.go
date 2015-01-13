@@ -55,10 +55,10 @@ func TestItemsCreate(t *testing.T) {
 	}
 
 	// Make sure image was actually created on s3 and that its contents match what we expect
-	if !s3FileExists(item.ImageOrigPath) {
+	if !s3FileExists(item.ImageS3Path) {
 		t.Error("File was not created on s3.")
 	}
-	if calculateHashForS3File(item.ImageOrigPath) != blueImageHash {
+	if calculateHashForS3File(item.ImageS3Path) != blueImageHash {
 		t.Error("The s3 file hash did not equal what we expected it to be (the blue image hash). Therefore, image file was not actually uploaded.")
 	}
 
@@ -165,11 +165,11 @@ func TestItemsUpdate(t *testing.T) {
 	res.AssertBodyContains(origItem.ImageUrl)
 
 	// Make sure the image on s3 has the same name
-	if !s3FileExists(origItem.ImageOrigPath) {
-		t.Errorf("The file does not exist or its name was changed on s3. Expected: %s", origItem.ImageOrigPath)
+	if !s3FileExists(origItem.ImageS3Path) {
+		t.Errorf("The file does not exist or its name was changed on s3. Expected: %s", origItem.ImageS3Path)
 	} else {
 		// Make sure the contents of the new file are what we expect
-		if calculateHashForS3File(origItem.ImageOrigPath) != redImageHash {
+		if calculateHashForS3File(origItem.ImageS3Path) != redImageHash {
 			t.Error("The s3 file hash did not equal what we expected it to be (the red image hash). Therefore, image file on s3 was not updated.")
 		}
 	}
@@ -192,24 +192,24 @@ func TestItemsUpdate(t *testing.T) {
 	if updatedNameAndImageItem.Name != newName {
 		t.Errorf("The item name was not updated. Expected %s but got %s", newName, updatedNameAndImageItem.Name)
 	}
-	if updatedNameAndImageItem.ImageOrigPath == origItem.ImageOrigPath {
-		t.Error("The ImageOrigPath property was not updated, but we expected it to be because the name changed.")
+	if updatedNameAndImageItem.ImageS3Path == origItem.ImageS3Path {
+		t.Error("The ImageS3Path property was not updated, but we expected it to be because the name changed.")
 	}
 	if updatedNameAndImageItem.ImageUrl == origItem.ImageUrl {
 		t.Error("The ImageUrl property was not updated, but we expected it to be because the name changed.")
 	}
 
 	// Make sure the old file no longer exists
-	if s3FileExists(origItem.ImageOrigPath) {
-		t.Errorf("The old file still exists at %s. Should be deleted since the name was changed.", origItem.ImageOrigPath)
+	if s3FileExists(origItem.ImageS3Path) {
+		t.Errorf("The old file still exists at %s. Should be deleted since the name was changed.", origItem.ImageS3Path)
 	}
 
 	// Make sure the new file does exist
-	if !s3FileExists(updatedNameAndImageItem.ImageOrigPath) {
-		t.Errorf("The new image file was not created at %s after the name was changed.", updatedNameAndImageItem.ImageOrigPath)
+	if !s3FileExists(updatedNameAndImageItem.ImageS3Path) {
+		t.Errorf("The new image file was not created at %s after the name was changed.", updatedNameAndImageItem.ImageS3Path)
 	} else {
 		// Make sure the contents of the new file are what we expect
-		if calculateHashForS3File(updatedNameAndImageItem.ImageOrigPath) != clearImageHash {
+		if calculateHashForS3File(updatedNameAndImageItem.ImageS3Path) != clearImageHash {
 			t.Error("The s3 file hash did not equal what we expected it to be (the clear image hash). Therefore, image file on s3 was not updated.")
 		}
 	}
@@ -232,25 +232,25 @@ func TestItemsUpdate(t *testing.T) {
 	if updatedNameOnlyItem.Name != newestName {
 		t.Errorf("The item name was not updated. Expected %s but got %s", newestName, updatedNameOnlyItem.Name)
 	}
-	if updatedNameOnlyItem.ImageOrigPath == updatedNameAndImageItem.ImageOrigPath {
-		t.Error("The ImageOrigPath property was not updated, but we expected it to be because the name changed.")
+	if updatedNameOnlyItem.ImageS3Path == updatedNameAndImageItem.ImageS3Path {
+		t.Error("The ImageS3Path property was not updated, but we expected it to be because the name changed.")
 	}
 	if updatedNameOnlyItem.ImageUrl == updatedNameAndImageItem.ImageUrl {
 		t.Error("The ImageUrl property was not updated, but we expected it to be because the name changed.")
 	}
 
 	// Make sure the old file no longer exists
-	if s3FileExists(updatedNameAndImageItem.ImageOrigPath) {
+	if s3FileExists(updatedNameAndImageItem.ImageS3Path) {
 		t.Errorf("The old file still exists at %s. Should be deleted since the name was changed.",
-			updatedNameAndImageItem.ImageOrigPath)
+			updatedNameAndImageItem.ImageS3Path)
 	}
 
 	// Make sure the new file does exist
-	if !s3FileExists(updatedNameOnlyItem.ImageOrigPath) {
-		t.Errorf("The new image file was not created at %s after the name was changed.", updatedNameOnlyItem.ImageOrigPath)
+	if !s3FileExists(updatedNameOnlyItem.ImageS3Path) {
+		t.Errorf("The new image file was not created at %s after the name was changed.", updatedNameOnlyItem.ImageS3Path)
 	} else {
 		// Make sure the contents of the new file are what we expect
-		if calculateHashForS3File(updatedNameOnlyItem.ImageOrigPath) != clearImageHash {
+		if calculateHashForS3File(updatedNameOnlyItem.ImageS3Path) != clearImageHash {
 			t.Error("The s3 file hash did not equal what we expected it to be (the clear image hash). Therefore, image file on s3 was changed?")
 		}
 	}
@@ -297,7 +297,7 @@ func TestItemsDelete(t *testing.T) {
 	}
 
 	// Make sure image was actually deleted from s3
-	if s3FileExists(item.ImageOrigPath) {
+	if s3FileExists(item.ImageS3Path) {
 		t.Error("File was not deleted from s3.")
 	}
 }

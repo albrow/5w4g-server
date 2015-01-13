@@ -71,7 +71,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 		panic(err)
 	} else {
-		item.ImageOrigPath = imagePath
+		item.ImageS3Path = imagePath
 		item.ImageUrl = imageUrl
 	}
 
@@ -187,29 +187,29 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 		if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 			panic(err)
 		} else {
-			item.ImageOrigPath = imagePath
+			item.ImageS3Path = imagePath
 			item.ImageUrl = imageUrl
 		}
 	case itemData.FileExists("image") && nameChanged:
 		// We should delete the old image (which uses the old name)
 		// and then upload the new one using the new item name
-		if err := deleteImage(item.ImageOrigPath); err != nil {
+		if err := deleteImage(item.ImageS3Path); err != nil {
 			panic(err)
 		}
 		if imagePath, imageUrl, err := uploadImage(itemData.GetFile("image"), item.Name); err != nil {
 			panic(err)
 		} else {
-			item.ImageOrigPath = imagePath
+			item.ImageS3Path = imagePath
 			item.ImageUrl = imageUrl
 		}
 	case !itemData.FileExists("image") && nameChanged:
 		// We should rename the existing (old) image file since the
 		// item name has been changed
-		newPath, newUrl, err := renameImage(item.ImageOrigPath, item.Name)
+		newPath, newUrl, err := renameImage(item.ImageS3Path, item.Name)
 		if err != nil {
 			panic(err)
 		}
-		item.ImageOrigPath = newPath
+		item.ImageS3Path = newPath
 		item.ImageUrl = newUrl
 	}
 	if err := zoom.Save(item); err != nil {
@@ -240,7 +240,7 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Delete the image from S3
-	deleteImage(item.ImageOrigPath)
+	deleteImage(item.ImageS3Path)
 
 	// Delete from database
 	if err := zoom.Delete(item); err != nil {
@@ -264,13 +264,13 @@ func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 	r.JSON(res, 200, items)
 }
 
-func calculateImageOrigPath(itemName, filename string) string {
+func calculateImageS3Path(itemName, filename string) string {
 	imageFilename := url.QueryEscape(itemName)
 	return fmt.Sprintf("items/%s%s", imageFilename, filepath.Ext(filename))
 }
 
 func calculateImageUrl(itemName, filename string) string {
-	orig := calculateImageOrigPath(itemName, filename)
+	orig := calculateImageS3Path(itemName, filename)
 
 	// In the url you use to actually get the image file, Amazon replaces "+" with
 	// "%2B", so we'll do that too. WARNING: there may be other characters where this
@@ -298,7 +298,7 @@ func uploadImage(fileHeader *multipart.FileHeader, itemName string) (imageOrigPa
 	imageType, _ := lib.GetImageMimeType(fileHeader.Filename)
 
 	// Calculate and set original image path
-	imageOrigPath = calculateImageOrigPath(itemName, fileHeader.Filename)
+	imageOrigPath = calculateImageS3Path(itemName, fileHeader.Filename)
 
 	// Get the bucket instance
 	bucket, err := lib.S3Bucket()
@@ -338,7 +338,7 @@ func renameImage(oldPath string, newName string) (newPath string, newUrl string,
 	}
 	oldUrl, err := url.Parse(oldPath)
 	oldFilename := filepath.Base(oldUrl.Path)
-	newPath = calculateImageOrigPath(newName, oldFilename)
+	newPath = calculateImageS3Path(newName, oldFilename)
 	newUrl = calculateImageUrl(newName, oldFilename)
 
 	// As far as I know the only way to do this with goamz is to
