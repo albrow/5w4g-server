@@ -41,19 +41,33 @@ func main() {
 
 	// Define routes
 	router := mux.NewRouter()
+
+	// Admin Authentication
 	adminTokens := controllers.AdminTokensController{}
 	router.HandleFunc("/admin_users/sign_in", adminTokens.Create).Methods("POST")
+
+	// Admin Users
 	adminUsers := controllers.AdminUsersController{}
 	router.HandleFunc("/admin_users", adminUsers.Create).Methods("POST")
 	router.HandleFunc("/admin_users/{id}", adminUsers.Show).Methods("GET")
 	router.HandleFunc("/admin_users", adminUsers.Index).Methods("GET")
 	router.HandleFunc("/admin_users/{id}", adminUsers.Delete).Methods("DELETE")
+
+	// Items
 	items := controllers.ItemsController{}
 	router.HandleFunc("/items", items.Create).Methods("POST")
 	router.HandleFunc("/items", items.Index).Methods("GET")
 	router.HandleFunc("/items/{id}", items.Show).Methods("GET")
 	router.HandleFunc("/items/{id}", items.Update).Methods("PUT")
 	router.HandleFunc("/items/{id}", items.Delete).Methods("DELETE")
+
+	// Orders
+	orders := controllers.OrdersController{}
+	router.HandleFunc("/orders", orders.Create).Methods("POST")
+	router.HandleFunc("/orders", orders.Index).Methods("GET")
+	router.HandleFunc("/orders/{id}", orders.Show).Methods("GET")
+	router.HandleFunc("/orders/{id}", orders.Update).Methods("PUT")
+	router.HandleFunc("/orders/{id}", orders.Delete).Methods("DELETE")
 	n.UseHandler(router)
 
 	// Run

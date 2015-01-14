@@ -19,7 +19,7 @@ func Init() {
 		})
 
 		// Register all models
-		models := []zoom.Model{&AdminUser{}, &Item{}}
+		models := []zoom.Model{&AdminUser{}, &Item{}, &OrderItem{}, &Order{}}
 		for _, m := range models {
 			if err := zoom.Register(m); err != nil {
 				panic(err)
