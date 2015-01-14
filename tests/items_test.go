@@ -334,11 +334,8 @@ func createItemRequest(rec *fipple.Recorder, fields map[string]string, imageFile
 	if err != nil {
 		panic(err)
 	}
-	files := map[string]*fipple.File{
-		"image": &fipple.File{
-			Name:    filepath.Base(imageFile),
-			Content: testImageFile,
-		},
+	files := map[string]*os.File{
+		"image": testImageFile,
 	}
 
 	// Create the request, add token, and return it
@@ -375,17 +372,14 @@ func createMockItem(name, description string, price float64) *models.Item {
 // image file, just pass in a blank string.
 func updateItemRequest(rec *fipple.Recorder, id string, fields map[string]string, imageFile string) *http.Request {
 	// Set up the files that will be written to the form
-	files := map[string]*fipple.File{}
+	files := map[string]*os.File{}
 	if imageFile != "" {
 		testImageFile, err := os.Open(imageFile)
 		if err != nil {
 			panic(err)
 		}
-		files = map[string]*fipple.File{
-			"image": &fipple.File{
-				Name:    filepath.Base(imageFile),
-				Content: testImageFile,
-			},
+		files = map[string]*os.File{
+			"image": testImageFile,
 		}
 	}
 
