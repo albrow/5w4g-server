@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/albrow/5w4g-server/config"
 	"github.com/albrow/5w4g-server/controllers"
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/negroni-json-recovery"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/martini-contrib/cors"
+	"github.com/unrolled/render"
+	"net/http"
 )
 
 func main() {
@@ -48,28 +51,42 @@ func main() {
 
 	// Admin Users
 	adminUsers := controllers.AdminUsersController{}
-	router.HandleFunc("/admin_users", adminUsers.Create).Methods("POST")
-	router.HandleFunc("/admin_users/{id}", adminUsers.Show).Methods("GET")
-	router.HandleFunc("/admin_users", adminUsers.Index).Methods("GET")
-	router.HandleFunc("/admin_users/{id}", adminUsers.Delete).Methods("DELETE")
+	router.HandleFunc("/admin_users", RequireAdmin(adminUsers.Create)).Methods("POST")
+	router.HandleFunc("/admin_users/{id}", RequireAdmin(adminUsers.Show)).Methods("GET")
+	router.HandleFunc("/admin_users", RequireAdmin(adminUsers.Index)).Methods("GET")
+	router.HandleFunc("/admin_users/{id}", RequireAdmin(adminUsers.Delete)).Methods("DELETE")
 
 	// Items
 	items := controllers.ItemsController{}
-	router.HandleFunc("/items", items.Create).Methods("POST")
+	router.HandleFunc("/items", RequireAdmin(items.Create)).Methods("POST")
 	router.HandleFunc("/items", items.Index).Methods("GET")
 	router.HandleFunc("/items/{id}", items.Show).Methods("GET")
-	router.HandleFunc("/items/{id}", items.Update).Methods("PUT")
-	router.HandleFunc("/items/{id}", items.Delete).Methods("DELETE")
+	router.HandleFunc("/items/{id}", RequireAdmin(items.Update)).Methods("PUT")
+	router.HandleFunc("/items/{id}", RequireAdmin(items.Delete)).Methods("DELETE")
 
 	// Orders
 	orders := controllers.OrdersController{}
 	router.HandleFunc("/orders", orders.Create).Methods("POST")
-	router.HandleFunc("/orders", orders.Index).Methods("GET")
-	router.HandleFunc("/orders/{id}", orders.Show).Methods("GET")
-	router.HandleFunc("/orders/{id}", orders.Update).Methods("PUT")
-	router.HandleFunc("/orders/{id}", orders.Delete).Methods("DELETE")
-	n.UseHandler(router)
+	router.HandleFunc("/orders", RequireAdmin(orders.Index)).Methods("GET")
+	router.HandleFunc("/orders/{id}", RequireAdmin(orders.Show)).Methods("GET")
+	router.HandleFunc("/orders/{id}", RequireAdmin(orders.Update)).Methods("PUT")
+	router.HandleFunc("/orders/{id}", RequireAdmin(orders.Delete)).Methods("DELETE")
 
-	// Run
+	// Start the server
+	n.UseHandler(router)
 	n.Run(":" + config.Port)
+}
+
+// TODO: use at the router level instead of repeating it in the controllers everywhere.
+func RequireAdmin(next http.HandlerFunc) func(http.ResponseWriter, *http.Request) {
+	return func(res http.ResponseWriter, req *http.Request) {
+		// If an admin user is not signed in, print an error and don't continue
+		if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
+			r := render.New(render.Options{})
+			r.JSON(res, 401, lib.ErrUnauthorized)
+			return
+		}
+		// Otherwise, continue down the middleware chain by calling next
+		next(res, req)
+	}
 }

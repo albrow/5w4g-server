@@ -25,12 +25,6 @@ var acceptedImageExts = []string{"gif", "svg"}
 func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Parse data from request
 	itemData, err := data.Parse(req)
 	if err != nil {
@@ -103,12 +97,6 @@ func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 
 func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
-
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
 
 	// Get the id from the url
 	vars := mux.Vars(req)
@@ -222,12 +210,6 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 
 func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
-
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
 
 	// Get the id from the url
 	vars := mux.Vars(req)

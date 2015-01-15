@@ -17,12 +17,6 @@ type AdminUsersController struct{}
 func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Parse data from request
 	adminData, err := data.Parse(req)
 	if err != nil {
@@ -74,12 +68,6 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Get the id from the url
 	vars := mux.Vars(req)
 	id := vars["id"]
@@ -108,12 +96,6 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Find all admin users in the database
 	var admins []*models.AdminUser
 	if err := zoom.NewQuery("AdminUser").Scan(&admins); err != nil {
@@ -127,16 +109,13 @@ func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) 
 func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request) {
 	r := render.New(render.Options{})
 
-	// Make sure we're signed in
-	currentUser := lib.CurrentAdminUser(req)
-	if currentUser == nil {
-		r.JSON(res, 401, lib.ErrUnauthorized)
-		return
-	}
-
 	// Get the id from the url
 	vars := mux.Vars(req)
 	id := vars["id"]
+
+	// Get the current user
+	// Note: Earlier in the middleware chain we made sure currentUser was not nil
+	currentUser := lib.CurrentAdminUser(req)
 
 	// Sanity check. (You can't delete yourself)
 	if currentUser.Id == id {
