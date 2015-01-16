@@ -77,7 +77,10 @@ func main() {
 	n.Run(":" + config.Port)
 }
 
-// TODO: use at the router level instead of repeating it in the controllers everywhere.
+// RequireAdmin is a middleware-like function that wraps around an http.HandlerFunc.
+// It checks for the presence of a valid JWT in the header of the request. If the token
+// is valid, it calls next. If the token wasn't provided or is invalid, it writes a
+// 401 error to res and returns without calling next.
 func RequireAdmin(next http.HandlerFunc) func(http.ResponseWriter, *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
 		// If an admin user is not signed in, print an error and don't continue
