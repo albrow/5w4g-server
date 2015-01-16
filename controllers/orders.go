@@ -7,7 +7,6 @@ import (
 type OrdersController struct{}
 
 func (o OrdersController) Create(res http.ResponseWriter, req *http.Request) {
-	panic("Orders.Create not yet implemented!")
 }
 
 func (o OrdersController) Show(res http.ResponseWriter, req *http.Request) {

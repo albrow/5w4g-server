@@ -15,7 +15,7 @@ import (
 type AdminTokensController struct{}
 
 func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Parse request body
 	adminData, err := data.Parse(req)

@@ -15,7 +15,7 @@ import (
 type AdminUsersController struct{}
 
 func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Parse data from request
 	adminData, err := data.Parse(req)
@@ -66,7 +66,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 }
 
 func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Get the id from the url
 	vars := mux.Vars(req)
@@ -94,7 +94,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 }
 
 func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Find all admin users in the database
 	var admins []*models.AdminUser
@@ -107,7 +107,7 @@ func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) 
 }
 
 func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Get the id from the url
 	vars := mux.Vars(req)

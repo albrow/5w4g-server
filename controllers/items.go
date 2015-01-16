@@ -23,7 +23,7 @@ type ItemsController struct{}
 var acceptedImageExts = []string{"gif", "svg"}
 
 func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Parse data from request
 	itemData, err := data.Parse(req)
@@ -79,7 +79,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 }
 
 func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Get the id from the url
 	vars := mux.Vars(req)
@@ -96,7 +96,7 @@ func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 }
 
 func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Get the id from the url
 	vars := mux.Vars(req)
@@ -209,7 +209,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 }
 
 func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Get the id from the url
 	vars := mux.Vars(req)
@@ -234,7 +234,7 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 }
 
 func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
-	r := render.New(render.Options{})
+	r := render.New()
 
 	// Find all admin users in the database
 	var items []*models.Item

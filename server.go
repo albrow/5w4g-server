@@ -85,7 +85,7 @@ func RequireAdmin(next http.HandlerFunc) func(http.ResponseWriter, *http.Request
 	return func(res http.ResponseWriter, req *http.Request) {
 		// If an admin user is not signed in, print an error and don't continue
 		if currentUser := lib.CurrentAdminUser(req); currentUser == nil {
-			r := render.New(render.Options{})
+			r := render.New()
 			r.JSON(res, 401, lib.ErrUnauthorized)
 			return
 		}
