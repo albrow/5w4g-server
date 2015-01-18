@@ -3,6 +3,7 @@ package controllers
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"github.com/albrow/5w4g-server/config"
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
@@ -29,7 +30,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	val.MatchEmail("email")
 	val.Require("password")
 	if val.HasErrors() {
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 
@@ -39,7 +40,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 		if _, ok := err.(*zoom.ModelNotFoundError); ok {
 			// This means a model with that email address was not found
 			val.AddError("email", "email or password was incorrect.")
-			r.JSON(res, 422, val.ErrorMap())
+			r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 			return
 		} else {
 			// This means there was an error connecting to the database
@@ -50,7 +51,7 @@ func (c *AdminTokensController) Create(res http.ResponseWriter, req *http.Reques
 	// Check if the found admin's password matches the submitted password
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.HashedPassword), adminData.GetBytes("password")); err != nil {
 		val.AddError("email", "email or password was incorrect.")
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 

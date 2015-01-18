@@ -42,7 +42,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 		}
 	}
 	if val.HasErrors() {
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 
@@ -62,7 +62,7 @@ func (c AdminUsersController) Create(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Render response
-	r.JSON(res, 200, admin)
+	r.JSON(res, http.StatusOK, admin)
 }
 
 func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
@@ -81,7 +81,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 			jsonErr := map[string][]string{
 				"id": []string{msg},
 			}
-			r.JSON(res, 422, jsonErr)
+			r.JSON(res, lib.StatusUnprocessableEntity, jsonErr)
 			return
 		} else {
 			// This means there was some other error
@@ -90,7 +90,7 @@ func (c AdminUsersController) Show(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	r.JSON(res, 200, admin)
+	r.JSON(res, http.StatusOK, admin)
 }
 
 func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) {
@@ -103,7 +103,7 @@ func (c AdminUsersController) Index(res http.ResponseWriter, req *http.Request) 
 	}
 
 	// Render response
-	r.JSON(res, 200, admins)
+	r.JSON(res, http.StatusOK, admins)
 }
 
 func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request) {
@@ -123,7 +123,7 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 		jsonErr := map[string][]string{
 			"id": []string{"You can't delete yourself, dummy!"},
 		}
-		r.JSON(res, 422, jsonErr)
+		r.JSON(res, lib.StatusUnprocessableEntity, jsonErr)
 		return
 	}
 
@@ -133,5 +133,5 @@ func (c AdminUsersController) Delete(res http.ResponseWriter, req *http.Request)
 	}
 
 	// Render response
-	r.JSON(res, 200, struct{}{})
+	r.JSON(res, http.StatusOK, struct{}{})
 }

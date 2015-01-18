@@ -50,7 +50,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	if val.HasErrors() {
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 
@@ -75,7 +75,7 @@ func (c ItemsController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	r.JSON(res, 200, item)
+	r.JSON(res, http.StatusOK, item)
 }
 
 func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
@@ -92,7 +92,7 @@ func (c ItemsController) Show(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// render response
-	r.JSON(res, 200, item)
+	r.JSON(res, http.StatusOK, item)
 }
 
 func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
@@ -145,7 +145,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 
 	// Render validation errors if any
 	if val.HasErrors() {
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 
@@ -205,7 +205,7 @@ func (c ItemsController) Update(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	r.JSON(res, 200, item)
+	r.JSON(res, http.StatusOK, item)
 }
 
 func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
@@ -230,7 +230,7 @@ func (c ItemsController) Delete(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	r.JSON(res, 200, struct{}{})
+	r.JSON(res, http.StatusOK, struct{}{})
 }
 
 func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
@@ -243,7 +243,7 @@ func (c ItemsController) Index(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Render response
-	r.JSON(res, 200, items)
+	r.JSON(res, http.StatusOK, items)
 }
 
 func calculateImageS3Path(itemName, filename string) string {

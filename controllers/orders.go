@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/albrow/5w4g-server/lib"
 	"github.com/albrow/5w4g-server/models"
 	"github.com/albrow/go-data-parser"
 	"github.com/albrow/zoom"
@@ -38,7 +39,7 @@ func (o OrdersController) Create(res http.ResponseWriter, req *http.Request) {
 	val.Require("email")
 	val.Require("items")
 	if val.HasErrors() {
-		r.JSON(res, 422, val.ErrorMap())
+		r.JSON(res, lib.StatusUnprocessableEntity, val.ErrorMap())
 		return
 	}
 
@@ -54,14 +55,14 @@ func (o OrdersController) Create(res http.ResponseWriter, req *http.Request) {
 		if datum.ItemId == "" {
 			// Return a validation error if any itemId parameters are blank
 			msg := fmt.Sprintf("items[%d] had a blank itemId. itemId is required for each item.", i)
-			r.JSON(res, 422, map[string]string{"items": msg})
+			r.JSON(res, lib.StatusUnprocessableEntity, map[string]string{"items": msg})
 			return
 		}
 		if (datum.Quantity <= 0) || (datum.Quantity >= 1e4) {
 			// Return a validation error if any quantity parameters are
 			// out of range.
 			msg := fmt.Sprintf("items[%d] had an invalid quantity. quantity must be between 0 and 10,000.", i)
-			r.JSON(res, 422, map[string]string{"items": msg})
+			r.JSON(res, lib.StatusUnprocessableEntity, map[string]string{"items": msg})
 			return
 		}
 		itemIds[i] = datum.ItemId
@@ -72,7 +73,7 @@ func (o OrdersController) Create(res http.ResponseWriter, req *http.Request) {
 		if _, ok := err.(*zoom.KeyNotFoundError); ok {
 			// This means the itemId was invalid. Return a validation error.
 			msg := fmt.Sprintf("One of the items had an invalid itemId. %s.", err.Error())
-			r.JSON(res, 422, map[string]string{"items": msg})
+			r.JSON(res, lib.StatusUnprocessableEntity, map[string]string{"items": msg})
 			return
 		} else {
 			// For any other error, panic
@@ -97,7 +98,7 @@ func (o OrdersController) Create(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Return the Order
-	r.JSON(res, 200, order)
+	r.JSON(res, http.StatusOK, order)
 }
 
 func (o OrdersController) Show(res http.ResponseWriter, req *http.Request) {
