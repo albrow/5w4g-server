@@ -5,9 +5,9 @@ import (
 )
 
 type Order struct {
-	Items []*OrderItem `json:"items"`
-	Email string       `json:"email"`
-	Identifier
+	Items      []*OrderItem `json:"items"`
+	Email      string       `json:"email" zoom:"index"`
+	Identifier `redis:"-"`
 }
 
 // AddItem adds quantity of item to the order. It does not save the order, so

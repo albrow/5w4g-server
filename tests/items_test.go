@@ -348,25 +348,6 @@ func createItemRequest(rec *fipple.Recorder, fields map[string]string, imageFile
 	return req
 }
 
-// createMockItem creates an item in the database using a mock (fake) ImageUrl property.
-// This function is useful for cases where we don't actually care about the s3 functionality. E.g.
-// when testing Show and Index. It panics if there was an error creating the item or connecting
-// to the database.
-func createMockItem(name, description string, price float64) *models.Item {
-	config.Init()
-	models.Init()
-	item := &models.Item{
-		Name:        name,
-		Description: description,
-		Price:       price,
-		ImageUrl:    "http://lorempixel.com/300/200/cats",
-	}
-	if err := zoom.Save(item); err != nil {
-		panic(err)
-	}
-	return item
-}
-
 // updateItemRequest creates and returns an http.Request with the given parameters, which
 // will update an existing item when sent (e.g. with rec.Do). If you don't want to include the
 // image file, just pass in a blank string.

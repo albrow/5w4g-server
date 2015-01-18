@@ -151,3 +151,22 @@ func calculateHashForS3File(path string) string {
 	io.Copy(h, bytes.NewBuffer(contents))
 	return string(h.Sum(nil))
 }
+
+// createMockItem creates an item in the database using a mock (fake) ImageUrl property.
+// This function is useful for cases where we don't actually care about the s3 functionality. E.g.
+// when testing Show and Index. It panics if there was an error creating the item or connecting
+// to the database.
+func createMockItem(name, description string, price float64) *models.Item {
+	config.Init()
+	models.Init()
+	item := &models.Item{
+		Name:        name,
+		Description: description,
+		Price:       price,
+		ImageUrl:    "http://lorempixel.com/300/200/cats",
+	}
+	if err := zoom.Save(item); err != nil {
+		panic(err)
+	}
+	return item
+}
