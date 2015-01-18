@@ -8,5 +8,5 @@ type Item struct {
 	Description   string  `json:"description"`
 	AmountInStock int     `json:"amountInStock,omitempty"`
 	AmountOrdered int     `json:"amountOrdered,omitempty"`
-	Identifier
+	Identifier    `redis:"-"`
 }
